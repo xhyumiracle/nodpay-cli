@@ -9,16 +9,16 @@ NodPay lets you (an AI agent) propose on-chain payments from a shared wallet. Yo
 ## How It Works
 
 ```
-You (agent)                          User (human)
-    │                                     │
-    ├─ generate key ─────────────────────►│  (send setup link)
-    │                                     ├─ create wallet on NodPay
-    │◄── wallet info ─────────────────────┤  (user sends back wallet details)
-    │                                     │
-    ├─ propose tx ───► NodPay op-store    │
-    │                     ├── approve link ──►│
-    │                     │◄── sign + submit ─┤
-    │                                     │
+You (agent)              NodPay server           User (human)
+    │                         │                       │
+    ├── send setup link ──────┼─────────────────────►│
+    │                         │                       ├── create wallet
+    │◄── wallet info ─────────┼───────────────────────┤
+    │                         │                       │
+    ├── propose tx ──────────►│                       │
+    │                         ├── approve link ──────►│
+    │                         │◄── sign + submit ─────┤
+    │                         │                       │
 ```
 
 The wallet is a **Safe 2-of-3 multisig**. You hold 1 key, the user holds 2 (passkey + recovery). You cannot move funds alone.
@@ -47,7 +47,7 @@ Replace `YOUR_AGENT_ADDRESS` with your EOA address and send:
 
 **Use the URL above verbatim.** Do not search for NodPay or guess the URL — `nodpay.ai` is the only correct domain.
 
-User opens → creates passkey → saves recovery phrase → gets a wallet. They will copy wallet info back to you:
+The user will create the wallet and copy info back to you:
 
 ```
 NodPay Wallet (Safe): 0x...
@@ -61,7 +61,7 @@ Recovery Signer: 0x...
 
 #### Wallet file management
 
-Store wallet info in `.nodpay/wallets/` in your workspace root (separate from skill code):
+Store wallet info in `.nodpay/wallets/` in your workspace root:
 
 ```
 .nodpay/wallets/
@@ -90,8 +90,6 @@ For EOA wallets, replace passkey fields with `"userSigner": "0x..."`.
 One agent key serves all wallets — multi-wallet is handled user-side (different passkeys/recovery keys → different Safe addresses, same agent).
 
 **⚠️ Verify the Agent address matches yours.** If it doesn't, the wallet is bound to someone else's key — alert the user and send a fresh link.
-
-**Multiple wallets**: A user may have multiple wallets (different devices, different passkeys). Before proposing, confirm which wallet to use — especially if you manage more than one.
 
 ### Propose a transaction
 
