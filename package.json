@@ -1,7 +1,7 @@
 {
   "name": "nodpay",
   "version": "0.2.0",
-  "description": "NodPay CLI — propose on-chain payments from agent-human shared wallets",
+  "description": "NodPay CLI \u2014 propose on-chain payments from agent-human shared wallets",
   "type": "module",
   "bin": {
     "nodpay": "./bin/nodpay.mjs"
@@ -9,7 +9,6 @@
   "files": [
     "bin/",
     "scripts/",
-    "references/",
     "SKILL.md"
   ],
   "repository": {
