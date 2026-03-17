@@ -1,0 +1,27 @@
+{
+  "name": "nodpay",
+  "version": "0.1.0",
+  "description": "NodPay CLI — propose on-chain payments from agent-human shared wallets",
+  "type": "module",
+  "bin": {
+    "nodpay": "./bin/nodpay.mjs"
+  },
+  "files": [
+    "bin/",
+    "scripts/",
+    "references/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xhyumiracle/nodpay-cli.git"
+  },
+  "homepage": "https://nodpay.ai",
+  "keywords": ["crypto", "wallet", "safe", "multisig", "agent", "erc-4337", "payment"],
+  "author": "xhyumiracle",
+  "license": "MIT",
+  "dependencies": {
+    "@nodpay/core": "^0.1.0",
+    "@safe-global/relay-kit": "^4.1.1",
+    "ethers": "^6.16.0"
+  }
+}

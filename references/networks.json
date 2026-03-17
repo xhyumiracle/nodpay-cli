@@ -1,0 +1,91 @@
+{
+  "mainnet": {
+    "ethereum": {
+      "name": "Ethereum",
+      "chainId": 1,
+      "rpcUrl": "https://ethereum-rpc.publicnode.com",
+      "txServiceUrl": "https://safe-transaction-mainnet.safe.global",
+      "safePrefix": "eth",
+      "explorerUrl": "https://etherscan.io",
+      "explorerTxPath": "/tx/",
+      "explorerAddrPath": "/address/",
+      "nativeCurrency": "ETH",
+      "bundlerUrlTemplate": "https://api.pimlico.io/v2/1/rpc?apikey={PIMLICO_API_KEY}"
+    },
+    "base": {
+      "name": "Base",
+      "chainId": 8453,
+      "rpcUrl": "https://base-rpc.publicnode.com",
+      "txServiceUrl": "https://safe-transaction-base.safe.global",
+      "safePrefix": "base",
+      "explorerUrl": "https://basescan.org",
+      "explorerTxPath": "/tx/",
+      "explorerAddrPath": "/address/",
+      "nativeCurrency": "ETH",
+      "gasSponsored": true,
+      "bundlerUrlTemplate": "https://api.pimlico.io/v2/8453/rpc?apikey={PIMLICO_API_KEY}"
+    },
+    "arbitrum": {
+      "name": "Arbitrum",
+      "chainId": 42161,
+      "rpcUrl": "https://arbitrum-one-rpc.publicnode.com",
+      "txServiceUrl": "https://safe-transaction-arbitrum.safe.global",
+      "safePrefix": "arb1",
+      "explorerUrl": "https://arbiscan.io",
+      "explorerTxPath": "/tx/",
+      "explorerAddrPath": "/address/",
+      "nativeCurrency": "ETH",
+      "bundlerUrlTemplate": "https://api.pimlico.io/v2/42161/rpc?apikey={PIMLICO_API_KEY}"
+    },
+    "polygon": {
+      "name": "Polygon",
+      "chainId": 137,
+      "rpcUrl": "https://polygon-bor-rpc.publicnode.com",
+      "txServiceUrl": "https://safe-transaction-polygon.safe.global",
+      "safePrefix": "matic",
+      "explorerUrl": "https://polygonscan.com",
+      "explorerTxPath": "/tx/",
+      "explorerAddrPath": "/address/",
+      "nativeCurrency": "MATIC",
+      "bundlerUrlTemplate": "https://api.pimlico.io/v2/137/rpc?apikey={PIMLICO_API_KEY}"
+    },
+    "optimism": {
+      "name": "Optimism",
+      "chainId": 10,
+      "rpcUrl": "https://optimism-rpc.publicnode.com",
+      "txServiceUrl": "https://safe-transaction-optimism.safe.global",
+      "safePrefix": "oeth",
+      "explorerUrl": "https://optimistic.etherscan.io",
+      "explorerTxPath": "/tx/",
+      "explorerAddrPath": "/address/",
+      "nativeCurrency": "ETH",
+      "bundlerUrlTemplate": "https://api.pimlico.io/v2/10/rpc?apikey={PIMLICO_API_KEY}"
+    }
+  },
+  "testnet": {
+    "sepolia": {
+      "name": "Sepolia (Ethereum)",
+      "chainId": 11155111,
+      "rpcUrl": "https://ethereum-sepolia-rpc.publicnode.com",
+      "txServiceUrl": "https://safe-transaction-sepolia.safe.global",
+      "safePrefix": "sep",
+      "explorerUrl": "https://sepolia.etherscan.io",
+      "explorerTxPath": "/tx/",
+      "explorerAddrPath": "/address/",
+      "nativeCurrency": "ETH",
+      "bundlerUrlTemplate": "https://api.pimlico.io/v2/11155111/rpc?apikey={PIMLICO_API_KEY}"
+    },
+    "base_sepolia": {
+      "name": "Base Sepolia",
+      "chainId": 84532,
+      "rpcUrl": "https://base-sepolia-rpc.publicnode.com",
+      "txServiceUrl": "https://safe-transaction-base-sepolia.safe.global",
+      "safePrefix": "basesep",
+      "explorerUrl": "https://sepolia.basescan.org",
+      "explorerTxPath": "/tx/",
+      "explorerAddrPath": "/address/",
+      "nativeCurrency": "ETH",
+      "bundlerUrlTemplate": "https://api.pimlico.io/v2/84532/rpc?apikey={PIMLICO_API_KEY}"
+    }
+  }
+}
