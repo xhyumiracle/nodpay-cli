@@ -45,7 +45,6 @@ Before merging SKILL.md changes, mentally simulate: a fresh agent reads this fil
 |------|----------|---------|
 | `SKILL.md` | External agents | Complete usage guide. Self-contained. |
 | `AGENT-NOTES.md` | Agents (advanced) | Edge cases, operational patterns. |
-| `.env.example` | External agents | Minimal env template. Only required vars uncommented. |
 | `CONTRIBUTING.md` | Repo maintainers | This file. How to write the skill. |
 | `references/` | Agents (machine-readable) | Data files (networks, constants). |
 
@@ -61,6 +60,5 @@ Before merging SKILL.md changes, mentally simulate: a fresh agent reads this fil
 
 - [ ] All script names match actual filenames in `scripts/`
 - [ ] All env vars mentioned are in `.env.example`
-- [ ] All commands work from the `skill/` directory
 - [ ] No internal URLs (localhost, bot.xhyumiracle.com) leak into agent-facing docs
-- [ ] Tested with `npm install` from a clean clone
+- [ ] Tested with `npx nodpay propose` from a clean environment
