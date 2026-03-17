@@ -38,7 +38,6 @@ NODPAY_AGENT_KEY=0x... npx nodpay propose \
 
 - **Full agent guide**: [nodpay.ai/skill.md](https://nodpay.ai/skill.md)
 - **Website**: [nodpay.ai](https://nodpay.ai)
-- **Architecture**: [ARCHITECTURE.md](https://github.com/xhyumiracle/nodpay/blob/main/ARCHITECTURE.md)
 
 ## Supported chains
 
