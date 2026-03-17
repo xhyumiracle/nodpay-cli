@@ -9,8 +9,7 @@
       "explorerUrl": "https://etherscan.io",
       "explorerTxPath": "/tx/",
       "explorerAddrPath": "/address/",
-      "nativeCurrency": "ETH",
-      "bundlerUrlTemplate": "https://api.pimlico.io/v2/1/rpc?apikey={PIMLICO_API_KEY}"
+      "nativeCurrency": "ETH"
     },
     "base": {
       "name": "Base",
@@ -22,8 +21,7 @@
       "explorerTxPath": "/tx/",
       "explorerAddrPath": "/address/",
       "nativeCurrency": "ETH",
-      "gasSponsored": true,
-      "bundlerUrlTemplate": "https://api.pimlico.io/v2/8453/rpc?apikey={PIMLICO_API_KEY}"
+      "gasSponsored": true
     },
     "arbitrum": {
       "name": "Arbitrum",
@@ -34,8 +32,7 @@
       "explorerUrl": "https://arbiscan.io",
       "explorerTxPath": "/tx/",
       "explorerAddrPath": "/address/",
-      "nativeCurrency": "ETH",
-      "bundlerUrlTemplate": "https://api.pimlico.io/v2/42161/rpc?apikey={PIMLICO_API_KEY}"
+      "nativeCurrency": "ETH"
     },
     "polygon": {
       "name": "Polygon",
@@ -46,8 +43,7 @@
       "explorerUrl": "https://polygonscan.com",
       "explorerTxPath": "/tx/",
       "explorerAddrPath": "/address/",
-      "nativeCurrency": "MATIC",
-      "bundlerUrlTemplate": "https://api.pimlico.io/v2/137/rpc?apikey={PIMLICO_API_KEY}"
+      "nativeCurrency": "MATIC"
     },
     "optimism": {
       "name": "Optimism",
@@ -58,8 +54,7 @@
       "explorerUrl": "https://optimistic.etherscan.io",
       "explorerTxPath": "/tx/",
       "explorerAddrPath": "/address/",
-      "nativeCurrency": "ETH",
-      "bundlerUrlTemplate": "https://api.pimlico.io/v2/10/rpc?apikey={PIMLICO_API_KEY}"
+      "nativeCurrency": "ETH"
     }
   },
   "testnet": {
@@ -72,8 +67,7 @@
       "explorerUrl": "https://sepolia.etherscan.io",
       "explorerTxPath": "/tx/",
       "explorerAddrPath": "/address/",
-      "nativeCurrency": "ETH",
-      "bundlerUrlTemplate": "https://api.pimlico.io/v2/11155111/rpc?apikey={PIMLICO_API_KEY}"
+      "nativeCurrency": "ETH"
     },
     "base_sepolia": {
       "name": "Base Sepolia",
@@ -84,8 +78,7 @@
       "explorerUrl": "https://sepolia.basescan.org",
       "explorerTxPath": "/tx/",
       "explorerAddrPath": "/address/",
-      "nativeCurrency": "ETH",
-      "bundlerUrlTemplate": "https://api.pimlico.io/v2/84532/rpc?apikey={PIMLICO_API_KEY}"
+      "nativeCurrency": "ETH"
     }
   }
 }
