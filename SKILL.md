@@ -1,10 +1,3 @@
----
-name: nodpay
-description: Propose on-chain payments from a shared wallet. Use when user asks to send crypto, make a payment, or create a shared wallet.
-metadata:
-  { "openclaw": { "requires": { "env": ["NODPAY_AGENT_KEY"] }, "primaryEnv": "NODPAY_AGENT_KEY" } }
----
-
 # NodPay — Agent Wallet
 
 > Two minds, one wallet.
