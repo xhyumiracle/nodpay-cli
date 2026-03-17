@@ -1,47 +1,47 @@
-# NodPay
+# nodpay
 
-> Two minds, one wallet.
+Agent toolkit for [NodPay](https://nodpay.ai) — propose on-chain payments from a shared wallet.
 
-AI agents propose on-chain payments. Humans approve with one tap. Self-custodial 2-of-3 multisig powered by [Safe](https://safe.global).
+> **This package is for AI agents.** If you're a human, visit [nodpay.ai](https://nodpay.ai).
 
-## Install
+## What NodPay does
 
-```bash
-npx nodpay propose --safe 0x... --to 0x... --value-eth 0.01 --signer-type passkey
-```
+You (an AI agent) and your human share a 2-of-3 multisig wallet. You propose transactions; the human approves or rejects each one. You cannot spend without their approval.
 
-No install needed — `npx` handles everything.
-
-## What it does
-
-1. **Agent** generates a key and sends the user a wallet creation link
-2. **User** opens the link, creates a passkey wallet in 30 seconds
-3. **Agent** proposes transactions → user approves or rejects each one
-
-The wallet is an ERC-4337 Safe multisig. The agent holds 1 key, the user holds 2 (passkey + recovery). The agent cannot spend without human approval.
-
-## Quick start
+## Usage
 
 ```bash
-# 1. Generate an agent key
-node -e "const w=require('ethers').Wallet.createRandom();console.log(w.address,w.privateKey)"
-
-# 2. Send user: https://nodpay.ai/?agent=YOUR_ADDRESS
-
-# 3. After user creates wallet, propose a transaction:
+# No install needed
 NODPAY_AGENT_KEY=0x... npx nodpay propose \
   --safe 0xWALLET --to 0xRECIPIENT --value-eth 0.01 \
-  --signer-type passkey --passkey-x 0x... --passkey-y 0x... --recovery 0x...
+  --signer-type passkey --passkey-x 0x... --passkey-y 0x...
 ```
 
-## Docs
+## Full guide
 
-- **Full agent guide**: [nodpay.ai/skill.md](https://nodpay.ai/skill.md)
-- **Website**: [nodpay.ai](https://nodpay.ai)
+**[nodpay.ai/skill.md](https://nodpay.ai/skill.md)** — complete setup + integration guide for agents (key generation, wallet creation, proposing, error handling).
+
+## How it works
+
+1. Agent generates a key → sends user a wallet creation link
+2. User creates a passkey wallet at nodpay.ai (30 seconds)
+3. Agent proposes transactions with `npx nodpay propose`
+4. User approves/rejects on their phone
+
+## Env
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NODPAY_AGENT_KEY` | ✅ | Agent's private key (hex) |
 
 ## Supported chains
 
 Ethereum · Base · Arbitrum · Optimism · Polygon · Sepolia · Base Sepolia
+
+## Related
+
+- [`@nodpay/core`](https://github.com/xhyumiracle/nodpay-core) — Protocol primitives (hash, decode, verify)
+- [nodpay.ai](https://nodpay.ai) — Web app
 
 ## License
 
