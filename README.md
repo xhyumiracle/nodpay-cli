@@ -57,7 +57,7 @@ npx nodpay gasprice --chain base
 
 All config lives in `~/.nodpay/` — zero `process.env` references in code.
 
-- **Hardened Key Isolation:** private key written directly to `~/.nodpay/.env` (chmod 600), strictly excluded from stdout and agent context.
+- **Hardened Key Isolation:** private key written to `~/.nodpay/.env` (chmod 600), read via file I/O at runtime. Not passed through CLI args, env vars, or stdout.
 - **Zero Trust:** `txs` independently verifies every server response (decode calldata → recompute hash → recover signer → check owner set).
 - **Threshold Security:** 2-of-3 multisig — agent cannot move funds unilaterally.
 
