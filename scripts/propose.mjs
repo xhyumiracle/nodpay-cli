@@ -332,14 +332,16 @@ try {
     safeAddress.toLowerCase() !== SAFE_ADDRESS.toLowerCase()
   ) {
     const Safe = (await import('@safe-global/protocol-kit')).default;
+    const L2_SINGLETON = '0x29fcB43b46531BcA003ddC8FCB67FFE91900C762';
     // getPredictedSafe() returns the full config Safe4337Pack assembled — owners, threshold,
     // module setup (to/data), fallbackHandler, salt, etc. We re-init with the same config
-    // but isL1SafeSingleton=false so the SDK picks L2 singleton.
+    // but force L2 singleton via contractNetworks (SDK public API).
     const predictedSafe = safe4337Pack.protocolKit.getPredictedSafe();
     safe4337Pack.protocolKit = await Safe.init({
       provider: RPC_URL,
       signer: initOptions.signer,
       isL1SafeSingleton: false,
+      contractNetworks: { [CHAIN_ID]: { safeSingletonAddress: L2_SINGLETON } },
       predictedSafe,
     });
     safeAddress = await safe4337Pack.protocolKit.getAddress();
