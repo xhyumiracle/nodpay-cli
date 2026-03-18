@@ -16,12 +16,14 @@ This npm package (`nodpay`) is the **agent-facing CLI**. It is also published as
 | **ClawHub** (`clawhub install nodpay`) | `SKILL.md` only | OpenClaw agents |
 | **nodpay.ai/skill.md** | `SKILL.md` via CDN proxy | All agent frameworks |
 
-The CLI provides three commands:
+The CLI provides five commands:
 
 ```
 nodpay keygen     # Generate agent keypair (~/.nodpay/.env, chmod 600)
-nodpay propose    # Propose a transaction for human approval
+nodpay nonce      # Query next nonce (on-chain EntryPoint + pending proposals)
+nodpay propose    # Propose a transaction for human approval (--nonce required)
 nodpay txs        # List and verify transactions for a wallet
+nodpay gasprice   # Get current gas price + estimated cost per chain
 ```
 
 ## Quick Start
@@ -30,18 +32,25 @@ nodpay txs        # List and verify transactions for a wallet
 # 1. Generate key (public address only in stdout; key never exposed)
 npx nodpay keygen
 
-# 2. Propose a payment
+# 2. Get next nonce (on-chain + pending)
+npx nodpay nonce --safe 0xWALLET --chain base
+
+# 3. Propose a payment
 npx nodpay propose \
   --chain base \
   --safe 0xWALLET \
   --to 0xRECIPIENT \
   --value-eth 0.01 \
+  --nonce 0 \
   --human-signer-passkey-x 0x... \
   --human-signer-passkey-y 0x... \
   --recovery-signer 0x...
 
-# 3. Check pending transactions (with verification)
+# 4. Check transactions (with verification)
 npx nodpay txs --safe 0xWALLET
+
+# 5. Estimate gas cost for a sweep
+npx nodpay gasprice --chain base
 ```
 
 ## Security
