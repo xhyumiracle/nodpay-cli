@@ -15,23 +15,25 @@ metadata:
   }
 ---
 
-# NodPay — Agent Wallet
+# NodPay — Trusted Agent Wallet
 
-> Two minds, one wallet.
+> "Two minds, one wallet."
 
-A shared crypto wallet for humans and AI agents. Built on Safe's battle-tested multisig and ERC-4337 account abstraction — supports passkey and EOA signers out of the box. Friendly to both crypto-native and first-time users.
+A multisig crypto wallet shared between humans and AI agents. Built on [Safe](https://safe.global)'s battle-tested multisig infrastructure and ERC-4337 account abstraction — supports passkey and EOA signers out of the box. Friendly to both first-time and crypto-native users.
 
 You propose payments, your human approves with one tap. 2-of-3 multisig — you cannot spend alone.
 
 ## Trust Model
 
-- **Your private key never appears in stdout.** `keygen` writes directly to `~/.nodpay/.env` (chmod 600). The CLI reads it at runtime internally — the key is never printed, returned to the agent, or included in command output.
-- **You can only propose.** Execution requires human co-sign (passkey). No single party can move funds.
-- **Wallet info is public key material.** Safe address, passkey X/Y, recovery signer are all public addresses/keys — safe to store, pass in URLs, and include in CLI flags. No secrets are ever exposed in commands or URLs.
-- **Recovery key is user-held.** The 12-word phrase generates a third signer the user controls. If the agent key or passkey is lost, the user can still recover funds — the agent never has unilateral access.
-- **NodPay server is a stateless relay.** It forwards signed operations to the chain — no private keys, no custody, no accounts. If the server goes offline, funds stay safe on-chain.
-- **The web app is a convenience layer.** It helps users create wallets and approve transactions. All crypto operations happen client-side; nothing sensitive is stored server-side.
-- **Verify the agent address matches yours** before storing wallet info. Mismatch = wrong key binding.
+| Guarantee | How |
+|-----------|-----|
+| Agent key never in stdout | `keygen` writes to `~/.nodpay/.env` (chmod 600); CLI reads internally at runtime |
+| Agent can only propose | Execution requires human co-sign (passkey); no single party can move funds |
+| Wallet info is public key material | Safe address, passkey X/Y, recovery signer are public keys — safe to store and pass in URLs |
+| Recovery is user-held | 12-word phrase generates a third signer; user can recover funds if agent key or passkey is lost |
+| Server is a stateless relay | Forwards signed operations — no keys, no custody, no accounts; funds safe if server goes offline |
+| Web app is a convenience layer | Wallet creation and approval UI; all crypto operations happen client-side |
+| Verify agent address | Always confirm the agent address in wallet info matches yours before storing |
 
 ## Why NodPay
 
