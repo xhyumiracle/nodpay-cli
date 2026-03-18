@@ -7,6 +7,8 @@ description: Propose on-chain payments from a shared wallet. Use when user asks 
 
 > Two minds, one wallet.
 
+A shared crypto wallet for humans and AI agents. Built on Safe's battle-tested multisig and ERC-4337 account abstraction — supports passkey and EOA signers out of the box. Friendly to both crypto-native and first-time users.
+
 You propose payments, your human approves with one tap. 2-of-3 multisig — you cannot spend alone.
 
 ## Trust Model
