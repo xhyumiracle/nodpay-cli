@@ -59,11 +59,7 @@ if (chainArg) {
   RPC_URL = net.rpcUrl;
   CHAIN_ID = String(net.chainId);
 } else {
-  RPC_URL = process.env.RPC_URL;
-  CHAIN_ID = process.env.CHAIN_ID;
-}
-if (!RPC_URL || !CHAIN_ID) {
-  console.error('Error: Specify --chain <name> or set RPC_URL + CHAIN_ID env vars.\nSupported chains: ' + Object.keys(allChains).join(', '));
+  console.error('Error: --chain is required.\nSupported: ' + Object.keys(allChains).join(', '));
   process.exit(1);
 }
 const ENTRYPOINT_ADDRESS = ENTRYPOINT;
@@ -87,14 +83,27 @@ function loadAgentKey() {
   return null;
 }
 const NODPAY_AGENT_KEY = loadAgentKey();
-const DEFAULT_SAFE = process.env.SAFE_ADDRESS;
+const DEFAULT_SAFE = null; // always use --safe flag
 
 // BUNDLER: NodPay provides a public bundler proxy at nodpay.ai/api/bundler so
 // agents don't need their own bundler API key. This is a thin relay — it
 // forwards the UserOp to a bundler service and returns the result. The proxy
 // only sees the already-signed (partial) UserOp; it cannot modify or execute it.
-// For self-hosted setups, override with OP_STORE_URL env var.
-const opStoreBase = process.env.OP_STORE_URL || 'https://nodpay.ai/api';
+// For self-hosted setups, set OP_STORE_URL in .nodpay/.env.
+function loadDotEnvVar(name, fallback) {
+  try {
+    const envPath = join(process.cwd(), '.nodpay', '.env');
+    const lines = readFileSync(envPath, 'utf8').split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('#') || !trimmed.includes('=')) continue;
+      const [k, ...rest] = trimmed.split('=');
+      if (k.trim() === name) return rest.join('=').trim().replace(/^["']|["']$/g, '');
+    }
+  } catch {}
+  return fallback;
+}
+const opStoreBase = loadDotEnvVar('OP_STORE_URL', 'https://nodpay.ai/api');
 const BUNDLER_URL = `${opStoreBase}/bundler/${CHAIN_ID}`;
 
 if (!NODPAY_AGENT_KEY) {
@@ -324,7 +333,7 @@ try {
   const customNonceArg = getArg('--nonce');
   const reuseGasFrom = getArg('--reuse-gas-from'); // shortHash of a previous op to copy gas values from
   let txOptions = {};
-  const opStoreUrl = process.env.OP_STORE_URL || 'https://nodpay.ai/api';
+  const opStoreUrl = opStoreBase;
   const safeAddr = await safe4337Pack.protocolKit.getAddress();
 
   // Determine nonce: on-chain nonce is the source of truth.
@@ -510,7 +519,7 @@ try {
       result.opStoreError = storeData.error || `HTTP ${storeRes.status}`;
     }
     if (storeData.shortHash) {
-      const webBase = process.env.WEB_APP_URL || 'https://nodpay.ai/';
+      const webBase = loadDotEnvVar('WEB_APP_URL', 'https://nodpay.ai/');
       const purposeParam = purpose && purpose !== 'Unspecified' ? `&purpose=${encodeURIComponent(purpose)}` : '';
       approveUrl = `${webBase}approve?safeOpHash=${storeData.safeOpHash}${purposeParam}`;
       result.approveUrl = approveUrl;
