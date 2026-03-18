@@ -112,7 +112,13 @@ First tx deploys the wallet. Pass all params for first tx; after that `--safe` a
 npx nodpay txs --safe <SAFE>
 ```
 
-**Always run `txs` before proposing.** Do not assume a previous transaction is still pending — the human may have approved or rejected it without telling you. Check actual on-chain state first.
+**Always check nonce before proposing.** Do not assume a previous transaction is still pending — the human may have approved or rejected it without telling you.
+
+```bash
+npx nodpay nonce --safe <SAFE> --chain <CHAIN>
+```
+
+Returns `nextNonce` (from on-chain EntryPoint + pending proposals), `onChainNonce`, and `pendingCount`. Pass `nextNonce` as `--nonce` to propose.
 
 ```bash
 npx nodpay gasprice --chain <CHAIN>
