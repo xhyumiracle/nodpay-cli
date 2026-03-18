@@ -31,7 +31,7 @@ You propose payments, your human approves with one tap. 2-of-3 multisig — you 
 | **Zero Trust** | **End-to-end verification:** no party is implicitly trusted. Server validates signatures; client and CLI independently verify server responses (decode calldata → recompute hash → recover signer → check owner set). The blockchain serves as the canonical source of truth. |
 | **Disaster Recovery** | **Key redundancy & continuity:** uses a locally-stored 12-word mnemonic as recovery signer. Any two of the three signers can reconstruct authority to unlock the wallet, ensuring the user is never locked out by a single lost credential. |
 | **Hardened Key Isolation** | `keygen` writes to `~/.nodpay/.env` (chmod 600). The CLI reads the key via file I/O at runtime — not passed through CLI arguments, environment variables, or stdout. Only the public address is returned to the caller. |
-| **Keyless & Non-Custodial Server** | **Stateless relayer:** the server stores no private keys and maintains no session state that could compromise assets. All signing happens locally. Funds stay on-chain if the server goes offline. |
+| **Keyless & Non-Custodial Server** | **Stateless relayer:** the server stores no private keys, no passkey credentials, and no session state. Identity verification uses CREATE2 address prediction + cryptographic signatures — zero trusted storage. Funds stay on-chain if the server goes offline. |
 
 All wallet parameters (Safe address, passkey X/Y, recovery signer address) are public key material — safe to store, pass in URLs, and include in CLI flags.
 
