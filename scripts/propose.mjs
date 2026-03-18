@@ -17,7 +17,7 @@
  *   --purpose <text>         - Human-readable purpose
  *   --safe <address>         - Wallet (Safe) address
  *   --counterfactual         - Safe not yet deployed; include deployment in UserOp
- *   --user-signer <address>  - User's signer address (required for counterfactual)
+ *   --human-signer <address>  - Human's EOA signer address (for EOA mode)
  *   --salt <nonce>           - Salt nonce (required for counterfactual)
  *   --reuse-gas-from <shortHash>  - Reuse gas values from a previous op (shortHash prefix of safeOpHash)
  *   --nonce <n>              - Override nonce
@@ -130,7 +130,7 @@ const valueEth = getArg('--value-eth') || getArg('--value') || '0';
 const purpose = getArg('--purpose') || 'Unspecified';
 const safeOverride = getArg('--safe');
 let isCounterfactual = hasFlag('--counterfactual');
-const userSigner = getArg('--user-signer');
+const humanSigner = getArg('--human-signer');
 const salt = getArg('--salt') || '1001';
 
 // Passkey support
@@ -138,7 +138,7 @@ const passkeyX = getArg('--passkey-x');
 const passkeyY = getArg('--passkey-y');
 const passkeyRawId = getArg('--passkey-raw-id');
 const passkeyVerifier = getArg('--passkey-verifier') || '0x445a0683e494ea0c5AF3E83c5159fBE47Cf9e765';
-const recoveryAddress = getArg('--recovery');
+const recoverySigner = getArg('--recovery-signer');
 const isPasskey = !!(passkeyX && passkeyY);
 
 if (!to) {
@@ -168,8 +168,8 @@ if (!isCounterfactual && SAFE_ADDRESS) {
   }
 }
 
-if (isCounterfactual && !userSigner && !isPasskey) {
-  console.error(JSON.stringify({ error: '--counterfactual requires --user-signer <address> (or use passkey mode)' }));
+if (isCounterfactual && !humanSigner && !isPasskey) {
+  console.error(JSON.stringify({ error: '--counterfactual requires --human-signer <address> (or use passkey mode)' }));
   process.exit(1);
 }
 
@@ -280,8 +280,8 @@ try {
       customVerifierAddress: passkeyVerifier,
     };
     if (isCounterfactual) {
-      const passkeyOwners = recoveryAddress
-        ? [AGENT_ADDRESS, recoveryAddress] // SharedSigner auto-added by SDK
+      const passkeyOwners = recoverySigner
+        ? [AGENT_ADDRESS, recoverySigner] // SharedSigner auto-added by SDK
         : [AGENT_ADDRESS]; // SharedSigner auto-added by SDK
       initOptions.options = {
         owners: passkeyOwners,
@@ -295,10 +295,10 @@ try {
     // EOA signer: agent key as primary signer
     initOptions.signer = NODPAY_AGENT_KEY;
     if (isCounterfactual) {
-      // Canonical owner order: [userSigner, agent, recovery] — must match frontend
-      const eoaOwners = recoveryAddress
-        ? [userSigner, AGENT_ADDRESS, recoveryAddress]
-        : [userSigner, AGENT_ADDRESS];
+      // Canonical owner order: [humanSigner, agentSigner, recoverySigner] — must match frontend
+      const eoaOwners = recoverySigner
+        ? [humanSigner, AGENT_ADDRESS, recoverySigner]
+        : [humanSigner, AGENT_ADDRESS];
       initOptions.options = {
         owners: eoaOwners,
         threshold: 2,

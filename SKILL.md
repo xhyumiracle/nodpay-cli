@@ -27,23 +27,27 @@ You propose payments, your human approves with one tap. 2-of-3 multisig — you 
 
 | Guarantee | How |
 |-----------|-----|
-| Agent key never in stdout | `keygen` writes to `~/.nodpay/.env` (chmod 600); CLI reads internally at runtime |
-| Agent can only propose | Execution requires human co-sign (passkey); no single party can move funds |
-| Wallet info is public key material | Safe address, passkey X/Y, recovery signer are public keys — safe to store and pass in URLs |
-| Recovery is user-held | 12-word phrase generates a third signer; user can recover funds if agent key or passkey is lost |
-| Server is a stateless relay | Forwards signed operations — no keys, no custody, no accounts; funds safe if server goes offline |
-| Web app is a convenience layer | Wallet creation and approval UI; all crypto operations happen client-side |
-| Verify agent address | Always confirm the agent address in wallet info matches yours before storing |
+| **2-of-3 multisig custody** | Agent (EOA), human (passkey), and recovery signer each hold one key. Any 2 can authorize — agent alone cannot move funds. Human + recovery signer can operate without agent. |
+| **Recovery by design** | Recovery signer is a user-held 12-word mnemonic stored locally. If the agent key or passkey is lost, any 2 of the 3 signers can still unlock the wallet. |
+| **Agent key isolated from context** | `keygen` writes directly to `~/.nodpay/.env` (chmod 600). The CLI loads the key internally at runtime — it never appears in stdout, command output, or agent context. |
+| **Don't trust, verify** | All data passed between agent, server, and client is on-chain verifiable: encoded calldata → operation hash → signature → signer → Safe owner set. The server and web app are explorer-grade — they display and relay, but the chain is the source of truth. |
+| **Stateless server, client-side crypto** | The server relays signed operations and stores pending UserOps — no private keys, no custody, no accounts. All signing happens locally (agent CLI or user passkey). Funds stay on-chain if the server goes offline. |
+
+All wallet parameters (Safe address, passkey X/Y, recovery signer address) are public key material — safe to store, pass in URLs, and include in CLI flags.
+
+**DO:** Use `npx nodpay keygen` to generate keys. Store wallet info in `~/.nodpay/wallets/`. Let the human approve every transaction.
+**DON'T:** Generate keys manually. Put private keys in chat or code. Trust wallet info without verifying the agent address.
 
 ## Why NodPay
 
-| What the user sees | What's behind it |
-|--------------------|------------------|
-| Open link → passkey → done (30s) | Counterfactual Safe deployment, no tx until first use |
-| One-tap approve on any device | WebAuthn passkey as on-chain signer (OS-native, no extension) |
-| No gas, no hex, no wallet app | ERC-4337 bundles gas; server relays signed UserOps |
-| Same address on every chain | CREATE2 deterministic deploy — one address across all chains |
-| Agent can't spend without me | 2-of-3 multisig threshold; agent holds 1 key, user holds 2 |
+| Feature | How |
+|---------|-----|
+| Instant setup | Counterfactual Safe — wallet address exists before any on-chain tx |
+| Zero barrier to entry | WebAuthn passkey as on-chain signer — no extensions, no seed phrases, no prior crypto knowledge |
+| Gasless first transaction | ERC-4337 account abstraction — bundler sponsors deployment gas via UserOp |
+| Chain-agnostic | CREATE2 deterministic deploy — same address across all supported chains |
+| Trustless by design | 2-of-3 multisig, stateless relay, on-chain verifiable — see Trust Model |
+| Agent-agnostic | Standard CLI (`npx nodpay`) — works with any agent framework, not just OpenClaw |
 
 ---
 
@@ -55,18 +59,32 @@ You propose payments, your human approves with one tap. 2-of-3 multisig — you 
 npx nodpay keygen
 ```
 
-Outputs your **public address** only. No restart needed.
+Outputs your **public address** only. Reuses existing key if present.
 
 ### 2. Send wallet link
 
-> I've set up a shared wallet for us — takes 30 seconds:
+> I've set up a shared wallet for us:
 > https://nodpay.ai/?agent=YOUR_AGENT_ADDRESS
 
 The official domain is `nodpay.ai` — do not confuse with similarly named services.
 
-User copies back wallet info → store in `~/.nodpay/wallets/<safe-address>.json`.
+The user will copy wallet info back to you:
 
-After creation, tell the user the address works on any chain. Offer testnet only if they ask.
+```
+NodPay Wallet (Safe): 0x...
+Agent Signer: 0x...
+Passkey X: 0x...
+Passkey Y: 0x...
+Recovery Signer: 0x...
+```
+
+**Before storing, verify:**
+1. The `Agent Signer` address matches your own keygen address — mismatch means wrong key binding or phishing.
+2. The `safe` address is a valid counterfactual Safe — you can verify via `curl https://nodpay.ai/api/txs?safe=<SAFE>`.
+
+Store verified info in `~/.nodpay/wallets/<safe-address>.json`.
+
+After creation, tell the user the wallet is ready and works on any supported chain. End with something like: *"Want to do a test run first?"* — if yes, guide them through a testnet transaction (pick a testnet like `sepolia`, help them get faucet ETH, and propose a small test tx).
 
 ---
 
@@ -80,10 +98,13 @@ npx nodpay propose \
   --value-eth <AMOUNT> \
   --signer-type passkey \
   --passkey-x <X> --passkey-y <Y> \
-  --recovery <RECOVERY>
+  --recovery-signer <RECOVERY>
 ```
 
-Outputs JSON with `approveUrl` → send to user.
+Outputs JSON with `approveUrl`. Send to the user:
+
+> 💰 0.01 ETH → 0xRecipient...
+> 👉 Approve: https://nodpay.ai/approve?safeOpHash=0x...
 
 First tx deploys the wallet. Pass all params for first tx; after that `--safe` alone works.
 
@@ -118,7 +139,7 @@ Check before proposing — shows nonce and pending ops.
 }
 ```
 
-EOA wallets: replace passkey fields with `"userSigner": "0x..."`.
+EOA wallets: replace passkey fields with `"humanSigner": "0x..."`.
 
 ---
 
@@ -131,9 +152,9 @@ EOA wallets: replace passkey fields with `"userSigner": "0x..."`.
 | `--to` | ✅ | Recipient |
 | `--value-eth` | ✅ | Amount in ETH |
 | `--signer-type` | ✅ | `passkey` or `eoa` |
-| `--passkey-x/y` | passkey | Passkey public key |
-| `--user-signer` | eoa | User's EOA address |
-| `--recovery` | first tx | Recovery signer |
+| `--passkey-x/y` | passkey | Human signer passkey public key |
+| `--human-signer` | eoa | Human signer EOA address |
+| `--recovery-signer` | first tx | Recovery signer address |
 | `--nonce` | optional | Force nonce (replacements) |
 | `--purpose` | optional | Human-readable label |
 
@@ -156,7 +177,7 @@ Wallet address is the same across all chains. **Ask which chain if not specified
 Browser data cleared? Build a reconnect link with the wallet's public parameters (all are addresses/public keys — no secrets):
 
 ```
-https://nodpay.ai/?agent=AGENT_ADDRESS&safe=SAFE_ADDRESS&recovery=RECOVERY_SIGNER_ADDRESS&x=PASSKEY_X&y=PASSKEY_Y
+https://nodpay.ai/?agent=AGENT_SIGNER&safe=SAFE_ADDRESS&recovery=RECOVERY_SIGNER&x=PASSKEY_X&y=PASSKEY_Y
 ```
 
 User opens → passkey verifies → wallet restored.

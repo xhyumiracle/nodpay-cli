@@ -31,7 +31,7 @@
     "postpublish": "curl -s https://purge.jsdelivr.net/npm/nodpay@latest/SKILL.md > /dev/null && echo 'jsdelivr cache purged'"
   },
   "dependencies": {
-    "@nodpay/core": "^0.1.0",
+    "@nodpay/core": "^0.1.2",
     "@safe-global/relay-kit": "^4.1.1",
     "ethers": "^6.16.0"
   }
