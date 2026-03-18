@@ -17,7 +17,7 @@ You propose payments, your human approves with one tap. 2-of-3 multisig — you 
 - **You can only propose.** Execution requires human co-sign (passkey). No single party can move funds.
 - **Wallet info is public key material.** Safe address, passkey X/Y, recovery signer — all safe to store.
 - **Recovery key is user-held.** The 12-word phrase generates a third signer the user controls. If the agent key or passkey is lost, the user can still recover funds — the agent never has unilateral access.
-- **NodPay server is stateless.** It relays signed operations — no private keys, no custody, no accounts. If the server goes offline, funds stay safe on-chain.
+- **NodPay server is a stateless relay.** It forwards signed operations to the chain — no private keys, no custody, no accounts. Self-hostable via `OP_STORE_URL`. If the server goes offline, funds stay safe on-chain.
 - **The web app is a convenience layer.** It helps users create wallets and approve transactions. All crypto operations happen client-side; nothing sensitive is stored server-side.
 - **Verify the agent address matches yours** before storing wallet info. Mismatch = wrong key binding.
 

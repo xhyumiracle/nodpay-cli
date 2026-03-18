@@ -6,13 +6,16 @@
  * The agent signs first (1 of 2). The serialized SafeOperation is
  * output so the web app can have the user co-sign and submit.
  *
- * Agent key is read from .nodpay/.env (run `npx nodpay keygen` to generate).
+ * Agent key: read from .nodpay/.env (never from env vars or CLI args).
+ * Chain config: resolved via --chain from @nodpay/core networks registry.
+ * Bundler: NodPay public proxy (override with OP_STORE_URL for self-hosted).
  *
  * Args:
+ *   --chain <name>           - Chain name (ethereum, base, sepolia, etc.)
  *   --to <address>           - Recipient address
  *   --value-eth <amount>     - Value in ETH (default: 0)
  *   --purpose <text>         - Human-readable purpose
- *   --safe <address>         - Override SAFE_ADDRESS
+ *   --safe <address>         - Wallet (Safe) address
  *   --counterfactual         - Safe not yet deployed; include deployment in UserOp
  *   --user-signer <address>  - User's signer address (required for counterfactual)
  *   --salt <nonce>           - Salt nonce (required for counterfactual)
@@ -43,6 +46,9 @@ const chainArg = process.argv.includes('--chain')
   ? process.argv[process.argv.indexOf('--chain') + 1]
   : null;
 
+// CHAIN RESOLUTION: --chain flag looks up RPC and chain ID from @nodpay/core's
+// network registry (public RPC endpoints). No secrets involved — these are the
+// same public endpoints listed on chainlist.org.
 let RPC_URL, CHAIN_ID;
 if (chainArg) {
   const net = allChains[chainArg];
@@ -50,7 +56,7 @@ if (chainArg) {
     console.error(`Error: Unknown chain "${chainArg}". Supported: ${Object.keys(allChains).join(', ')}`);
     process.exit(1);
   }
-  RPC_URL = process.env.RPC_URL || net.rpcUrl;
+  RPC_URL = net.rpcUrl;
   CHAIN_ID = String(net.chainId);
 } else {
   RPC_URL = process.env.RPC_URL;
@@ -83,15 +89,13 @@ function loadAgentKey() {
 const NODPAY_AGENT_KEY = loadAgentKey();
 const DEFAULT_SAFE = process.env.SAFE_ADDRESS;
 
-// Safe4337Pack.init requires a bundlerUrl — it calls eth_chainId during init.
-// Use the NodPay server's bundler proxy so agents don't need their own bundler key.
-// Fallback to pimlico if PIMLICO_API_KEY is set (for local dev/testing).
-const PIMLICO_API_KEY = process.env.PIMLICO_API_KEY;
-const isProd = (process.env.NODE_ENV || 'production') === 'production';
-const opStoreBase = process.env.OP_STORE_URL || (isProd ? 'https://nodpay.ai/api' : 'http://localhost:8766');
-const BUNDLER_URL = PIMLICO_API_KEY
-  ? `https://api.pimlico.io/v2/${CHAIN_ID}/rpc?apikey=${PIMLICO_API_KEY}`
-  : `${opStoreBase}/bundler/${CHAIN_ID}`;
+// BUNDLER: NodPay provides a public bundler proxy at nodpay.ai/api/bundler so
+// agents don't need their own bundler API key. This is a thin relay — it
+// forwards the UserOp to a bundler service and returns the result. The proxy
+// only sees the already-signed (partial) UserOp; it cannot modify or execute it.
+// For self-hosted setups, override with OP_STORE_URL env var.
+const opStoreBase = process.env.OP_STORE_URL || 'https://nodpay.ai/api';
+const BUNDLER_URL = `${opStoreBase}/bundler/${CHAIN_ID}`;
 
 if (!NODPAY_AGENT_KEY) {
   console.error(JSON.stringify({ error: 'Missing NODPAY_AGENT_KEY in .nodpay/.env — run npx nodpay keygen first' }));
@@ -320,8 +324,7 @@ try {
   const customNonceArg = getArg('--nonce');
   const reuseGasFrom = getArg('--reuse-gas-from'); // shortHash of a previous op to copy gas values from
   let txOptions = {};
-  const isProd = (process.env.NODE_ENV || 'production') === 'production';
-  const opStoreUrl = process.env.OP_STORE_URL || (isProd ? 'https://nodpay.ai/api' : 'http://localhost:8766');
+  const opStoreUrl = process.env.OP_STORE_URL || 'https://nodpay.ai/api';
   const safeAddr = await safe4337Pack.protocolKit.getAddress();
 
   // Determine nonce: on-chain nonce is the source of truth.
@@ -507,7 +510,7 @@ try {
       result.opStoreError = storeData.error || `HTTP ${storeRes.status}`;
     }
     if (storeData.shortHash) {
-      const webBase = process.env.WEB_APP_URL || (isProd ? 'https://nodpay.ai' : 'https://bot.xhyumiracle.com/nodpay/index.html');
+      const webBase = process.env.WEB_APP_URL || 'https://nodpay.ai/';
       const purposeParam = purpose && purpose !== 'Unspecified' ? `&purpose=${encodeURIComponent(purpose)}` : '';
       approveUrl = `${webBase}approve?safeOpHash=${storeData.safeOpHash}${purposeParam}`;
       result.approveUrl = approveUrl;
