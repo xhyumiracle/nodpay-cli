@@ -14,7 +14,6 @@
  *   --chain <name>           - Chain name (ethereum, base, sepolia, etc.)
  *   --to <address>           - Recipient address
  *   --value-eth <amount>     - Value in ETH (default: 0)
- *   --purpose <text>         - Human-readable purpose
  *   --safe <address>         - Wallet (Safe) address
  *   --counterfactual         - Safe not yet deployed; include deployment in UserOp
  *   --human-signer-eoa <address>  - Human's EOA signer address (for EOA mode)
@@ -127,7 +126,6 @@ function hasFlag(name) {
 
 const to = getArg('--to');
 const valueEth = getArg('--value-eth') || getArg('--value') || '0';
-const purpose = getArg('--purpose') || 'Unspecified';
 const safeOverride = getArg('--safe');
 let isCounterfactual = hasFlag('--counterfactual');
 const humanSigner = getArg('--human-signer-eoa');
@@ -470,7 +468,6 @@ try {
     to,
     value,
     valueEth,
-    purpose,
     safeAddress,
     counterfactual: isCounterfactual,
     status: 'pending_user_signature',
@@ -491,8 +488,6 @@ try {
     to,
     value,
     valueEth,
-    // purpose intentionally NOT stored server-side — privacy by design
-    // purpose is passed via URL param in the approve link (private Telegram channel)
     safeAddress,
     chainId: parseInt(CHAIN_ID, 10),
     counterfactual: isCounterfactual,
@@ -522,8 +517,7 @@ try {
     }
     if (storeData.shortHash) {
       const webBase = loadDotEnvVar('WEB_APP_URL', 'https://nodpay.ai/');
-      const purposeParam = purpose && purpose !== 'Unspecified' ? `&purpose=${encodeURIComponent(purpose)}` : '';
-      approveUrl = `${webBase}approve?safeOpHash=${storeData.safeOpHash}${purposeParam}`;
+      approveUrl = `${webBase}approve?safeOpHash=${storeData.safeOpHash}`;
       result.approveUrl = approveUrl;
       result.opStoreSafeOpHash = storeData.safeOpHash;
       result.opStoreShortHash = storeData.shortHash;

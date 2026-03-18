@@ -154,7 +154,6 @@ EOA wallets: replace passkey fields with `"humanSignerEoa": "0x..."`.
 | `--human-signer-eoa` | eoa | Human signer EOA address |
 | `--recovery-signer` | first tx | Recovery signer address |
 | `--nonce` | optional | Force nonce (replacements) |
-| `--purpose` | optional | Human-readable label |
 
 Wallet address is the same across all chains. **Ask which chain if not specified.**
 
