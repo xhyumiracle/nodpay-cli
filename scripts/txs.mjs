@@ -124,7 +124,8 @@ try {
     }
   }
 
-  console.log(JSON.stringify(data, null, 2));
+  // BigInt values from @nodpay/core (e.g. decoded value) must be serialized as strings
+  console.log(JSON.stringify(data, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2));
 } catch (err) {
   console.error(JSON.stringify({ error: err.message }));
   process.exit(1);
