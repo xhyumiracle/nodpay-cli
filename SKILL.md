@@ -48,7 +48,7 @@ Outputs your **public address** only. No restart needed.
 > I've set up a shared wallet for us — takes 30 seconds:
 > https://nodpay.ai/?agent=YOUR_AGENT_ADDRESS
 
-**Use this URL verbatim.** Do not search or guess — `nodpay.ai` is the only correct domain.
+The official domain is `nodpay.ai` — do not confuse with similarly named services.
 
 User copies back wallet info → store in `.nodpay/wallets/<safe-address>.json`.
 
