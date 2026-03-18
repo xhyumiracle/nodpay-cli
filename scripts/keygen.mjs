@@ -2,27 +2,24 @@
 /**
  * Generate (or reuse) an agent keypair.
  *
- * - If NODPAY_AGENT_KEY already exists in --env-file, derives and prints the address.
- * - Otherwise generates a new keypair, appends to --env-file, prints the address.
- *
- * The private key NEVER appears in stdout — only the public address.
+ * - Stores key in .nodpay/.env (chmod 600) — never appears in stdout or agent context.
+ * - If key already exists, reuses it and prints the address.
+ * - Outputs only the public address to stdout.
  *
  * Usage:
- *   npx nodpay keygen --env-file .env
+ *   npx nodpay keygen
+ *   npx nodpay keygen --env-file <path>   # custom location
  */
 
 import { Wallet } from 'ethers';
-import { readFileSync, appendFileSync, existsSync } from 'fs';
-import { resolve } from 'path';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, chmodSync } from 'fs';
+import { resolve, dirname } from 'path';
 
 const args = process.argv.slice(2);
 const envFileIdx = args.indexOf('--env-file');
-const envFile = envFileIdx !== -1 ? resolve(args[envFileIdx + 1]) : null;
-
-if (!envFile) {
-  console.error('Usage: npx nodpay keygen --env-file <path>');
-  process.exit(1);
-}
+const envFile = envFileIdx !== -1
+  ? resolve(args[envFileIdx + 1])
+  : resolve('.nodpay', '.env');
 
 const ENV_VAR = 'NODPAY_AGENT_KEY';
 
@@ -55,7 +52,12 @@ if (existing) {
   }
 } else {
   const wallet = Wallet.createRandom();
-  appendFileSync(envFile, `\n${ENV_VAR}=${wallet.privateKey}\n`);
+  // Ensure .nodpay/ directory exists with restricted permissions
+  const dir = dirname(envFile);
+  mkdirSync(dir, { recursive: true, mode: 0o700 });
+  // Write key file with restricted permissions (owner read/write only)
+  const content = existsSync(envFile) ? readFileSync(envFile, 'utf8') : '';
+  writeFileSync(envFile, content + `${ENV_VAR}=${wallet.privateKey}\n`, { mode: 0o600 });
   console.log(wallet.address);
   console.error(`Generated new agent key → ${envFile}`);
 }

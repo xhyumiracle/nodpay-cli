@@ -65,7 +65,25 @@ if (!RPC_URL || !CHAIN_ID) {
   process.exit(1);
 }
 const ENTRYPOINT_ADDRESS = ENTRYPOINT;
-const NODPAY_AGENT_KEY = process.env.NODPAY_AGENT_KEY;
+
+// Read agent key: env var first, then .nodpay/.env file
+function loadAgentKey() {
+  if (process.env.NODPAY_AGENT_KEY) return process.env.NODPAY_AGENT_KEY;
+  try {
+    const envPath = join(process.cwd(), '.nodpay', '.env');
+    const lines = readFileSync(envPath, 'utf8').split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('#') || !trimmed.includes('=')) continue;
+      const [name, ...rest] = trimmed.split('=');
+      if (name.trim() === 'NODPAY_AGENT_KEY') {
+        return rest.join('=').trim().replace(/^["']|["']$/g, '');
+      }
+    }
+  } catch {}
+  return null;
+}
+const NODPAY_AGENT_KEY = loadAgentKey();
 const DEFAULT_SAFE = process.env.SAFE_ADDRESS;
 
 // Safe4337Pack.init requires a bundlerUrl — it calls eth_chainId during init.

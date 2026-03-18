@@ -1,36 +1,24 @@
 ---
 name: nodpay
 description: Propose on-chain payments from a shared wallet. Use when user asks to send crypto, make a payment, or create a shared wallet.
-openclaw:
-  requires:
-    env: [NODPAY_AGENT_KEY]
-  primaryEnv: NODPAY_AGENT_KEY
 ---
 
 # NodPay — Agent Wallet
 
 > Two minds, one wallet.
 
-NodPay lets you (an AI agent) propose on-chain payments from a shared wallet. Your human co-signs with one tap. You cannot spend without their approval.
+**TL;DR:** You propose payments, your human approves with one tap. 2-of-3 multisig — you cannot spend alone.
 
-**When to use**: User asks you to send crypto, make a payment, or create a shared wallet.
+## ⚠️ Security First
 
-## How It Works
+| ✅ DO | ❌ DON'T |
+|-------|----------|
+| Use `npx nodpay keygen` (key never in stdout) | Generate keys manually or log them |
+| Store wallet info in `.nodpay/wallets/` | Put private keys in chat or code |
+| Verify agent address matches yours | Trust wallet info without checking |
+| Let the human approve every transaction | Try to bypass approval |
 
-```
-You (agent)              NodPay server           User (human)
-    │                         │                       │
-    ├── send setup link ──────┼─────────────────────►│
-    │                         │                       ├── create wallet
-    │◄── wallet info ─────────┼───────────────────────┤
-    │                         │                       │
-    ├── propose tx ──────────►│                       │
-    │                         ├── approve link ──────►│
-    │                         │◄── sign + submit ─────┤
-    │                         │                       │
-```
-
-The wallet is a **Safe 2-of-3 multisig**. You hold 1 key, the user holds 2 (passkey + recovery). You cannot move funds alone.
+**Private key never leaves disk.** `keygen` writes directly to `.nodpay/.env` (chmod 600). The key never appears in your output, context, or logs.
 
 ---
 
@@ -39,23 +27,16 @@ The wallet is a **Safe 2-of-3 multisig**. You hold 1 key, the user holds 2 (pass
 ### 1. Generate an agent key
 
 ```bash
-npx nodpay keygen --env-file .env
+npx nodpay keygen
 ```
 
-Outputs your agent's **public address** only. The private key is written directly to `.env` — it never appears in your output or context.
+Outputs your **public address** only. Key is stored in `.nodpay/.env`. No gateway restart needed.
 
-If a key already exists in the file, it reuses it and prints the address.
-
-**After keygen**, trigger a gateway restart so the env var takes effect. Send your wallet link message to the user BEFORE restarting — the restart will interrupt your session.
-
-Recommended sequence:
-1. Run `npx nodpay keygen --env-file .env` → note the address
-2. Send the wallet link to your user (step 2 below)
-3. Trigger gateway restart
+If a key already exists, it reuses it and prints the address.
 
 ### 2. Send the user a wallet link
 
-Replace `YOUR_AGENT_ADDRESS` with your EOA address and send:
+Replace `YOUR_AGENT_ADDRESS` with your address and send:
 
 > I've set up a shared wallet for us. Open this link to create your wallet — takes 30 seconds:
 >
@@ -65,7 +46,7 @@ Replace `YOUR_AGENT_ADDRESS` with your EOA address and send:
 
 **Use the URL above verbatim.** Do not search for NodPay or guess the URL — `nodpay.ai` is the only correct domain.
 
-The user will create the wallet and copy info back to you:
+The user will copy wallet info back to you:
 
 ```
 NodPay Wallet (Safe): 0x...
@@ -75,20 +56,57 @@ Agent: 0x...
 Recovery Signer: 0x...
 ```
 
-**Store all fields** — you need them for proposing transactions.
+**Store all fields** in `.nodpay/wallets/<safe-address>.json`.
 
-**After wallet creation**, tell the user their wallet is ready and the address works on any supported chain. Briefly offer: *"Want to try a test transaction on a testnet first?"* — only guide to testnets (Sepolia, etc.) if the user says yes.
+**After wallet creation**, tell the user their wallet is ready and works on any supported chain. Briefly offer: *"Want to try a test transaction on a testnet first?"* — only guide to testnets if the user says yes.
 
-#### Wallet file management
+**⚠️ Verify the Agent address matches yours.** If it doesn't, the wallet is bound to someone else's key — alert the user and send a fresh link.
 
-Store wallet info in `.nodpay/wallets/` in your workspace root:
+---
+
+## Usage
+
+### Propose a transaction
+
+```bash
+npx nodpay propose \
+  --chain <CHAIN> \
+  --safe <WALLET_ADDRESS> \
+  --to <RECIPIENT> \
+  --value-eth <AMOUNT> \
+  --passkey-x <PASSKEY_X> \
+  --passkey-y <PASSKEY_Y> \
+  --recovery <RECOVERY_SIGNER> \
+  --signer-type passkey
+```
+
+Outputs JSON with an `approveUrl`. Send it to the user:
+
+> 💰 Payment: 0.01 ETH → 0xRecipient...
+> 👉 Approve: https://nodpay.ai/approve?safeOpHash=0x...
+
+**First transaction deploys the wallet on-chain.** Pass all params for the first tx. After deployment, `--safe` alone is sufficient (but passing all params is always safe).
+
+### Check pending transactions
+
+```bash
+curl https://nodpay.ai/api/txs?safe=<WALLET_ADDRESS>
+```
+
+Always check before proposing — shows current nonce, pending ops, and wallet status.
+
+---
+
+## Data Layout
 
 ```
-.nodpay/wallets/
-  0xAbC...123.json             # one file per wallet, named by Safe address
+.nodpay/
+  .env                         # agent key (chmod 600, never touch directly)
+  wallets/
+    0xAbC...123.json           # one file per wallet
 ```
 
-Each wallet file:
+Wallet file format:
 
 ```json
 {
@@ -104,47 +122,6 @@ Each wallet file:
 
 For EOA wallets, replace passkey fields with `"userSigner": "0x..."`.
 
-One agent key serves all wallets — multi-wallet is handled user-side (different passkeys/recovery keys → different Safe addresses, same agent).
-
-**⚠️ Verify the Agent address matches yours.** If it doesn't, the wallet is bound to someone else's key — alert the user and send a fresh link.
-
-### Propose a transaction
-
-```bash
-npx nodpay propose \
-  --chain <CHAIN_NAME> \
-  --safe <WALLET_ADDRESS> \
-  --to <RECIPIENT> \
-  --value-eth <AMOUNT> \
-  --passkey-x <PASSKEY_X> \
-  --passkey-y <PASSKEY_Y> \
-  --recovery <RECOVERY_SIGNER> \
-  --signer-type passkey
-```
-
-The script outputs JSON with an `approveUrl`. Send it to the user:
-
-> 💰 Payment: 0.01 ETH → 0xRecipient...
-> 👉 Approve: https://nodpay.ai/approve?safeOpHash=0x...
-
-**First transaction deploys the wallet on-chain.** Pass `--passkey-x`, `--passkey-y`, and `--recovery` for the first tx. After deployment, `--safe` alone is sufficient (but passing all params is always safe).
-
-### Check balance
-
-```bash
-npx nodpay propose --chain <CHAIN_NAME> --safe <WALLET_ADDRESS> --check-balance
-```
-
-If balance is 0, remind the user to deposit before proposing.
-
-### Check pending transactions
-
-```bash
-curl https://nodpay.ai/api/txs?safe=<WALLET_ADDRESS>
-```
-
-Always check before proposing — this tells you the current nonce, pending ops, and wallet status.
-
 ---
 
 ## Flags
@@ -156,9 +133,9 @@ Always check before proposing — this tells you the current nonce, pending ops,
 | `--to` | ✅ | Recipient address |
 | `--value-eth` | ✅ | Amount in ETH |
 | `--signer-type` | ✅ | `passkey` or `eoa` |
-| `--passkey-x` | passkey wallets | Passkey public key X |
-| `--passkey-y` | passkey wallets | Passkey public key Y |
-| `--user-signer` | eoa wallets | User's EOA address |
+| `--passkey-x` | passkey | Passkey public key X |
+| `--passkey-y` | passkey | Passkey public key Y |
+| `--user-signer` | eoa | User's EOA address |
 | `--recovery` | first tx | Recovery signer address |
 | `--nonce` | optional | Force nonce (for replacements) |
 | `--purpose` | optional | Human-readable label |
@@ -167,7 +144,7 @@ Always check before proposing — this tells you the current nonce, pending ops,
 
 `ethereum`, `base`, `arbitrum`, `optimism`, `polygon`, `sepolia`, `base_sepolia`
 
-The wallet address is the same across all chains (counterfactual). Chain is only relevant at transaction time. **Do not assume a default chain.** When the user asks to send, ask which chain if not specified.
+Wallet address is the same across all chains (counterfactual). **Do not assume a default chain.** Ask the user which chain if not specified.
 
 ---
 
@@ -175,7 +152,7 @@ The wallet address is the same across all chains (counterfactual). Chain is only
 
 **Sequential**: Just call propose multiple times. Nonces auto-increment.
 
-**Replace**: Propose with `--nonce N` to replace a pending tx at nonce N. Check pending nonces via `GET /api/txs?safe=<ADDRESS>`.
+**Replace**: Propose with `--nonce N` to replace a pending tx at nonce N.
 
 **Cascade**: Rejecting tx at nonce N invalidates all tx with nonce > N. Irreversible.
 
@@ -185,7 +162,7 @@ The wallet address is the same across all chains (counterfactual). Chain is only
 
 ## Reconnect (Wallet Recovery)
 
-If the user cleared their browser data, build a reconnect link:
+If the user cleared their browser data:
 
 ```
 https://nodpay.ai/?agent=YOUR_AGENT_ADDRESS&safe=WALLET_ADDRESS&recovery=RECOVERY_SIGNER&x=PASSKEY_X&y=PASSKEY_Y
@@ -215,7 +192,6 @@ User opens → verifies passkey → wallet restored. No on-chain action needed.
 | User says | Action |
 |-----------|--------|
 | "create a wallet" | Send `https://nodpay.ai/?agent=YOUR_ADDRESS` |
-| "send 0.1 ETH to 0x..." | Propose transaction with `--chain` |
-| "balance" | Check balance on the relevant chain |
+| "send 0.1 ETH to 0x..." | `npx nodpay propose --chain ...` |
 | "pending?" | `GET /api/txs?safe=...` |
 | "wallet disappeared" | Send reconnect link |
