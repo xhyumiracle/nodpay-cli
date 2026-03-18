@@ -1,65 +1,69 @@
-# nodpay
+# NodPay — Trusted Agent Wallet
 
-Agent toolkit for [NodPay](https://nodpay.ai) — propose on-chain payments from a shared wallet.
+> "Two minds, one wallet."
 
-> **This package is for AI agents.** If you're a human, visit [nodpay.ai](https://nodpay.ai).
+A multisig crypto wallet shared between humans and AI agents. Built on [Safe](https://safe.global)'s battle-tested multisig infrastructure and ERC-4337 account abstraction — supports passkey and EOA signers out of the box.
 
-## What NodPay does
+**For the full agent integration guide, see [nodpay.ai/skill.md](https://nodpay.ai/skill.md).**
 
-You (an AI agent) and your human share a 2-of-3 multisig wallet. You propose transactions; the human approves or rejects each one. You cannot spend without their approval.
+## Package Structure
 
-## Usage
+This npm package (`nodpay`) is the **agent-facing CLI**. It is also published as a skill on [ClawHub](https://clawhub.ai/xhyumiracle/nodpay).
 
-```bash
-# No install needed
-NODPAY_AGENT_KEY=0x... npx nodpay propose \
-  --safe 0xWALLET --to 0xRECIPIENT --value-eth 0.01 \
-  --signer-type passkey --passkey-x 0x... --passkey-y 0x...
+| Distribution | Contains | Audience |
+|--------------|----------|----------|
+| **npm** (`npx nodpay`) | CLI scripts + `SKILL.md` | Any AI agent |
+| **ClawHub** (`clawhub install nodpay`) | `SKILL.md` only | OpenClaw agents |
+| **nodpay.ai/skill.md** | `SKILL.md` via CDN proxy | All agent frameworks |
+
+The CLI provides three commands:
+
+```
+nodpay keygen     # Generate agent keypair (~/.nodpay/.env, chmod 600)
+nodpay propose    # Propose a transaction for human approval
+nodpay txs        # List and verify transactions for a wallet
 ```
 
-## Full guide
-
-**[nodpay.ai/skill.md](https://nodpay.ai/skill.md)** — complete setup + integration guide for agents (key generation, wallet creation, proposing, error handling).
-
-## How it works
-
-1. Agent generates a key → sends user a wallet creation link
-2. User creates a passkey wallet at nodpay.ai (30 seconds)
-3. Agent proposes transactions with `npx nodpay propose`
-4. User approves/rejects on their phone
-
-## Key generation
+## Quick Start
 
 ```bash
-npx nodpay keygen --env-file .env
+# 1. Generate key (public address only in stdout; key never exposed)
+npx nodpay keygen
+
+# 2. Propose a payment
+npx nodpay propose \
+  --chain base \
+  --safe 0xWALLET \
+  --to 0xRECIPIENT \
+  --value-eth 0.01 \
+  --human-signer-passkey-x 0x... \
+  --human-signer-passkey-y 0x... \
+  --recovery-signer 0x...
+
+# 3. Check pending transactions (with verification)
+npx nodpay txs --safe 0xWALLET
 ```
 
-Outputs the agent's **public address only**. The private key is written directly to `.env` — it never appears in stdout, logs, or the agent's context window.
+## Security
 
-If a key already exists, it reuses it and prints the address.
+All config lives in `~/.nodpay/` — zero `process.env` references in code.
 
-### Security design
+- **Hardened Key Isolation:** private key written directly to `~/.nodpay/.env` (chmod 600), strictly excluded from stdout and agent context.
+- **Zero Trust:** `txs` independently verifies every server response (decode calldata → recompute hash → recover signer → check owner set).
+- **Threshold Security:** 2-of-3 multisig — agent cannot move funds unilaterally.
 
-The agent (LLM) **never sees the private key**. `keygen` writes the secret directly to disk; the `propose` command reads it from the environment at runtime. This means:
-
-- No private key in conversation history or context window
-- No risk of leaking the key through prompt injection
-- The agent only needs the public address (for wallet links)
-
-## Env
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `NODPAY_AGENT_KEY` | ✅ | Agent's private key — use `npx nodpay keygen` to generate securely |
-
-## Supported chains
-
-Ethereum · Base · Arbitrum · Optimism · Polygon · Sepolia · Base Sepolia
+See [SKILL.md](./SKILL.md) for the complete Trust Model.
 
 ## Related
 
-- [`@nodpay/core`](https://www.npmjs.com/package/@nodpay/core) — Protocol primitives (hash, decode, verify)
-- [nodpay.ai](https://nodpay.ai) — Web app
+| Package | Description |
+|---------|-------------|
+| [`@nodpay/core`](https://www.npmjs.com/package/@nodpay/core) | Protocol primitives — hash, decode, verify (identity-agnostic) |
+| [nodpay.ai](https://nodpay.ai) | Web app — wallet creation & transaction approval |
+
+## Supported Chains
+
+Ethereum · Base · Arbitrum · Optimism · Polygon · Sepolia · Base Sepolia
 
 ## License
 
