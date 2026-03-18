@@ -64,12 +64,14 @@ if (chainArg) {
 }
 const ENTRYPOINT_ADDRESS = ENTRYPOINT;
 
-// SECURITY: Read agent key from .nodpay/.env file (chmod 600), not from
+const HOME = process.env.HOME || process.env.USERPROFILE || '/tmp';
+
+// SECURITY: Read agent key from ~/.nodpay/.env file (chmod 600), not from
 // process.env or CLI args. The key is loaded at runtime by the script itself,
 // so it never passes through the LLM agent's context or conversation history.
 function loadAgentKey() {
   try {
-    const envPath = join(process.cwd(), '.nodpay', '.env');
+    const envPath = join(HOME, '.nodpay', '.env');
     const lines = readFileSync(envPath, 'utf8').split('\n');
     for (const line of lines) {
       const trimmed = line.trim();
@@ -89,10 +91,10 @@ const DEFAULT_SAFE = null; // always use --safe flag
 // agents don't need their own bundler API key. This is a thin relay — it
 // forwards the UserOp to a bundler service and returns the result. The proxy
 // only sees the already-signed (partial) UserOp; it cannot modify or execute it.
-// For self-hosted setups, set OP_STORE_URL in .nodpay/.env.
+// Optional overrides (OP_STORE_URL, WEB_APP_URL) also read from ~/.nodpay/.env.
 function loadDotEnvVar(name, fallback) {
   try {
-    const envPath = join(process.cwd(), '.nodpay', '.env');
+    const envPath = join(HOME, '.nodpay', '.env');
     const lines = readFileSync(envPath, 'utf8').split('\n');
     for (const line of lines) {
       const trimmed = line.trim();
@@ -107,7 +109,7 @@ const opStoreBase = loadDotEnvVar('OP_STORE_URL', 'https://nodpay.ai/api');
 const BUNDLER_URL = `${opStoreBase}/bundler/${CHAIN_ID}`;
 
 if (!NODPAY_AGENT_KEY) {
-  console.error(JSON.stringify({ error: 'Missing NODPAY_AGENT_KEY in .nodpay/.env — run npx nodpay keygen first' }));
+  console.error(JSON.stringify({ error: 'Missing NODPAY_AGENT_KEY in ~/.nodpay/.env — run npx nodpay keygen first' }));
   process.exit(1);
 }
 

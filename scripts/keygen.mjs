@@ -13,13 +13,14 @@
 
 import { Wallet } from 'ethers';
 import { readFileSync, writeFileSync, mkdirSync, existsSync, chmodSync } from 'fs';
-import { resolve, dirname } from 'path';
+import { resolve, dirname, join } from 'path';
 
 const args = process.argv.slice(2);
 const envFileIdx = args.indexOf('--env-file');
+const HOME = process.env.HOME || process.env.USERPROFILE || '/tmp';
 const envFile = envFileIdx !== -1
   ? resolve(args[envFileIdx + 1])
-  : resolve('.nodpay', '.env');
+  : join(HOME, '.nodpay', '.env');
 
 const ENV_VAR = 'NODPAY_AGENT_KEY';
 
