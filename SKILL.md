@@ -108,13 +108,13 @@ Outputs JSON with `approveUrl`. Send to the user:
 
 First tx deploys the wallet. Pass all params for first tx; after that `--safe` alone works.
 
-### Check pending
+### Check transactions
 
 ```bash
-curl https://nodpay.ai/api/txs?safe=<SAFE>
+npx nodpay txs --safe <SAFE>
 ```
 
-Check before proposing — shows nonce and pending ops.
+Check before proposing — shows nonce, pending ops, and wallet status.
 
 ---
 
@@ -172,10 +172,16 @@ Wallet address is the same across all chains. **Ask which chain if not specified
 
 ## Reconnect
 
-Browser data cleared? Build a reconnect link with the wallet's public parameters (all are addresses/public keys — no secrets):
+Browser data cleared? Build a reconnect link from the wallet's stored parameters (all public — no secrets):
 
+**Passkey:**
 ```
 https://nodpay.ai/?agent=AGENT_SIGNER&safe=SAFE_ADDRESS&recovery=RECOVERY_SIGNER&x=PASSKEY_X&y=PASSKEY_Y
 ```
 
-User opens → passkey verifies → wallet restored.
+**EOA:**
+```
+https://nodpay.ai/?agent=AGENT_SIGNER&safe=SAFE_ADDRESS&recovery=RECOVERY_SIGNER&eoa=HUMAN_SIGNER_EOA
+```
+
+User opens → verifies identity → wallet restored.
