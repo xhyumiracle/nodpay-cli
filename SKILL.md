@@ -181,16 +181,18 @@ Wallet address is the same across all chains. **Ask which chain if not specified
 
 ## Reconnect
 
-Browser data cleared? Build a reconnect link from the wallet's stored parameters (all public — no secrets):
+Browser data cleared? Build a reconnect link from the wallet's stored parameters (all public — no secrets).
+
+**You MUST include `signerType`** — the client uses it to show the correct verification flow.
 
 **Passkey:**
 ```
-https://nodpay.ai/?agent=AGENT_SIGNER&safe=SAFE_ADDRESS&recovery=RECOVERY_SIGNER&x=PASSKEY_X&y=PASSKEY_Y
+https://nodpay.ai/?agent=AGENT_SIGNER&safe=SAFE_ADDRESS&recovery=RECOVERY_SIGNER&signerType=passkey&x=PASSKEY_X&y=PASSKEY_Y
 ```
 
 **EOA:**
 ```
-https://nodpay.ai/?agent=AGENT_SIGNER&safe=SAFE_ADDRESS&recovery=RECOVERY_SIGNER&eoa=HUMAN_SIGNER_EOA
+https://nodpay.ai/?agent=AGENT_SIGNER&safe=SAFE_ADDRESS&recovery=RECOVERY_SIGNER&signerType=eoa&eoa=HUMAN_SIGNER_EOA
 ```
 
-User opens → verifies identity → wallet restored.
+User opens → verifies identity (passkey assertion or MetaMask connect) → wallet restored.
