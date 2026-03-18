@@ -17,7 +17,7 @@
  *   --purpose <text>         - Human-readable purpose
  *   --safe <address>         - Wallet (Safe) address
  *   --counterfactual         - Safe not yet deployed; include deployment in UserOp
- *   --human-signer <address>  - Human's EOA signer address (for EOA mode)
+ *   --human-signer-eoa <address>  - Human's EOA signer address (for EOA mode)
  *   --salt <nonce>           - Salt nonce (required for counterfactual)
  *   --reuse-gas-from <shortHash>  - Reuse gas values from a previous op (shortHash prefix of safeOpHash)
  *   --nonce <n>              - Override nonce
@@ -130,12 +130,12 @@ const valueEth = getArg('--value-eth') || getArg('--value') || '0';
 const purpose = getArg('--purpose') || 'Unspecified';
 const safeOverride = getArg('--safe');
 let isCounterfactual = hasFlag('--counterfactual');
-const humanSigner = getArg('--human-signer');
+const humanSigner = getArg('--human-signer-eoa');
 const salt = getArg('--salt') || '1001';
 
 // Passkey support
-const passkeyX = getArg('--passkey-x');
-const passkeyY = getArg('--passkey-y');
+const passkeyX = getArg('--human-signer-passkey-x');
+const passkeyY = getArg('--human-signer-passkey-y');
 const passkeyRawId = getArg('--passkey-raw-id');
 const passkeyVerifier = getArg('--passkey-verifier') || '0x445a0683e494ea0c5AF3E83c5159fBE47Cf9e765';
 const recoverySigner = getArg('--recovery-signer');
@@ -169,7 +169,7 @@ if (!isCounterfactual && SAFE_ADDRESS) {
 }
 
 if (isCounterfactual && !humanSigner && !isPasskey) {
-  console.error(JSON.stringify({ error: '--counterfactual requires --human-signer <address> (or use passkey mode)' }));
+  console.error(JSON.stringify({ error: '--counterfactual requires --human-signer-eoa <address> (or use passkey mode)' }));
   process.exit(1);
 }
 

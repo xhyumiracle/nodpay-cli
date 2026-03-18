@@ -96,8 +96,8 @@ npx nodpay propose \
   --safe <SAFE> \
   --to <RECIPIENT> \
   --value-eth <AMOUNT> \
-  --signer-type passkey \
-  --passkey-x <X> --passkey-y <Y> \
+  --human-signer-passkey-x <X> \
+  --human-signer-passkey-y <Y> \
   --recovery-signer <RECOVERY>
 ```
 
@@ -131,15 +131,14 @@ Check before proposing — shows nonce and pending ops.
 {
   "safe": "0x...",
   "agentSigner": "0x...",
-  "signerType": "passkey",
-  "passkeyX": "0x...",
-  "passkeyY": "0x...",
-  "recovery": "0x...",
+  "humanSignerPasskeyX": "0x...",
+  "humanSignerPasskeyY": "0x...",
+  "recoverySigner": "0x...",
   "createdAt": "2025-01-01"
 }
 ```
 
-EOA wallets: replace passkey fields with `"humanSigner": "0x..."`.
+EOA wallets: replace passkey fields with `"humanSignerEoa": "0x..."`.
 
 ---
 
@@ -151,9 +150,8 @@ EOA wallets: replace passkey fields with `"humanSigner": "0x..."`.
 | `--safe` | ✅ | Wallet address |
 | `--to` | ✅ | Recipient |
 | `--value-eth` | ✅ | Amount in ETH |
-| `--signer-type` | ✅ | `passkey` or `eoa` |
-| `--passkey-x/y` | passkey | Human signer passkey public key |
-| `--human-signer` | eoa | Human signer EOA address |
+| `--human-signer-passkey-x/y` | passkey | Human signer passkey public key |
+| `--human-signer-eoa` | eoa | Human signer EOA address |
 | `--recovery-signer` | first tx | Recovery signer address |
 | `--nonce` | optional | Force nonce (replacements) |
 | `--purpose` | optional | Human-readable label |
