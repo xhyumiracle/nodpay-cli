@@ -68,6 +68,8 @@ Recovery Signer: 0x...
 
 **Store all fields** — you need them for proposing transactions.
 
+**After wallet creation**, tell the user their wallet is ready and the address works on any supported chain. Briefly offer: *"Want to try a test transaction on a testnet first?"* — only guide to testnets (Sepolia, etc.) if the user says yes.
+
 #### Wallet file management
 
 Store wallet info in `.nodpay/wallets/` in your workspace root:
@@ -87,7 +89,6 @@ Each wallet file:
   "passkeyX": "0x...",
   "passkeyY": "0x...",
   "recovery": "0x...",
-  "chain": "sepolia",
   "createdAt": "2025-01-01"
 }
 ```
@@ -172,7 +173,9 @@ Chain config (RPC, bundler, explorer) is auto-resolved from `references/networks
 
 ### Supported Chains
 
-`sepolia`, `ethereum`, `base`, `base_sepolia`, `arbitrum`, `optimism`, `polygon`
+`ethereum`, `base`, `arbitrum`, `optimism`, `polygon`, `sepolia`, `base_sepolia`
+
+The wallet address is the same across all chains (counterfactual). Chain is only relevant at transaction time. **Do not assume a default chain.** When the user asks to send, ask which chain if not specified.
 
 ---
 

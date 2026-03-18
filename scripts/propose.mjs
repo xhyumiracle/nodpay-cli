@@ -10,7 +10,7 @@
  *   NODPAY_AGENT_KEY  - Agent signer private key
  *   SAFE_ADDRESS       - Deployed Safe address (can be overridden with --safe)
  *   RPC_URL            - RPC endpoint
- *   CHAIN_ID           - Chain ID (default: 11155111)
+ *   CHAIN_ID           - Chain ID (required, no default)
  *
  * Args:
  *   --to <address>           - Recipient address
@@ -37,8 +37,12 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PENDING_DIR = join(__dirname, '..', '.pending-txs');
 mkdirSync(PENDING_DIR, { recursive: true });
 
-const RPC_URL = process.env.RPC_URL || 'https://ethereum-sepolia-rpc.publicnode.com';
-const CHAIN_ID = process.env.CHAIN_ID || '11155111';
+const RPC_URL = process.env.RPC_URL;
+const CHAIN_ID = process.env.CHAIN_ID;
+if (!RPC_URL || !CHAIN_ID) {
+  console.error('Error: RPC_URL and CHAIN_ID environment variables are required.\nSet them for your target chain. See references/networks.json for supported chains.');
+  process.exit(1);
+}
 const ENTRYPOINT_ADDRESS = ENTRYPOINT;
 const NODPAY_AGENT_KEY = process.env.NODPAY_AGENT_KEY;
 const DEFAULT_SAFE = process.env.SAFE_ADDRESS;
