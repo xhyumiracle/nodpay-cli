@@ -37,10 +37,31 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PENDING_DIR = join(__dirname, '..', '.pending-txs');
 mkdirSync(PENDING_DIR, { recursive: true });
 
-const RPC_URL = process.env.RPC_URL;
-const CHAIN_ID = process.env.CHAIN_ID;
+// Resolve chain config: --chain flag auto-resolves from networks.json, env vars as fallback
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const NETWORKS = require('@nodpay/core/networks');
+const allChains = { ...NETWORKS.mainnet, ...NETWORKS.testnet };
+
+const chainArg = process.argv.includes('--chain')
+  ? process.argv[process.argv.indexOf('--chain') + 1]
+  : null;
+
+let RPC_URL, CHAIN_ID;
+if (chainArg) {
+  const net = allChains[chainArg];
+  if (!net) {
+    console.error(`Error: Unknown chain "${chainArg}". Supported: ${Object.keys(allChains).join(', ')}`);
+    process.exit(1);
+  }
+  RPC_URL = process.env.RPC_URL || net.rpcUrl;
+  CHAIN_ID = String(net.chainId);
+} else {
+  RPC_URL = process.env.RPC_URL;
+  CHAIN_ID = process.env.CHAIN_ID;
+}
 if (!RPC_URL || !CHAIN_ID) {
-  console.error('Error: RPC_URL and CHAIN_ID environment variables are required.\nSet them for your target chain. See references/networks.json for supported chains.');
+  console.error('Error: Specify --chain <name> or set RPC_URL + CHAIN_ID env vars.\nSupported chains: ' + Object.keys(allChains).join(', '));
   process.exit(1);
 }
 const ENTRYPOINT_ADDRESS = ENTRYPOINT;

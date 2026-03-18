@@ -115,6 +115,7 @@ One agent key serves all wallets — multi-wallet is handled user-side (differen
 ```bash
 NODPAY_AGENT_KEY=0x... \
 npx nodpay propose \
+  --chain <CHAIN_NAME> \
   --safe <WALLET_ADDRESS> \
   --to <RECIPIENT> \
   --value-eth <AMOUNT> \
@@ -159,6 +160,7 @@ Always check before proposing — this tells you the current nonce, pending ops,
 
 | Flag | Required | Description |
 |------|----------|-------------|
+| `--chain` | ✅ | Chain name (e.g. `ethereum`, `base`, `sepolia`) |
 | `--safe` | ✅ | Wallet (Safe) address |
 | `--to` | ✅ | Recipient address |
 | `--value-eth` | ✅ | Amount in ETH |
@@ -178,7 +180,7 @@ Only one env var is required:
 |-----|-------------|
 | `NODPAY_AGENT_KEY` | Agent signing key (required) |
 
-Chain config (RPC, bundler, explorer) is auto-resolved from `references/networks.json`. No need to set `RPC_URL`, `CHAIN_ID`, or bundler keys.
+Chain config (RPC, bundler) is auto-resolved via `--chain` from [`@nodpay/core/networks`](https://www.npmjs.com/package/@nodpay/core). You can override with `RPC_URL`/`CHAIN_ID` env vars if needed, but `--chain` is the recommended way.
 
 ### Supported Chains
 
