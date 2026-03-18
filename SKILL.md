@@ -39,12 +39,19 @@ The wallet is a **Safe 2-of-3 multisig**. You hold 1 key, the user holds 2 (pass
 ### 1. Generate an agent key
 
 ```bash
-node -e "const w=require('ethers').Wallet.createRandom();console.log('Address:',w.address,'\nKey:',w.privateKey)"
+npx nodpay keygen --env-file .env
 ```
 
-Store the private key as `NODPAY_AGENT_KEY` in your environment. The address is your public agent identity.
+This outputs your agent's **public address** (stdout). The private key is written directly to `.env` — it never appears in your output or context.
 
-**⚠️ Storing the env var may trigger a restart.** Complete all config/env changes and wait for the restart to finish BEFORE sending any message to the user. Do not send messages and update config in parallel — the restart will truncate your message.
+If `NODPAY_AGENT_KEY` already exists in the file, it reuses the existing key and prints the address.
+
+**After keygen**, trigger a gateway restart so the env var takes effect. Send your wallet link message to the user BEFORE restarting — the restart will interrupt your session.
+
+Recommended sequence:
+1. Run `npx nodpay keygen --env-file .env` → note the address
+2. Send the wallet link to your user (step 2 below)
+3. Trigger gateway restart
 
 ### 2. Send the user a wallet link
 

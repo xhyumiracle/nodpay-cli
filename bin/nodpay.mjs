@@ -7,6 +7,10 @@ if (command === 'propose') {
   const scriptPath = new URL('../scripts/propose.mjs', import.meta.url).pathname;
   process.argv = [process.argv[0], scriptPath, ...process.argv.slice(3)];
   await import(scriptPath);
+} else if (command === 'keygen') {
+  const scriptPath = new URL('../scripts/keygen.mjs', import.meta.url).pathname;
+  process.argv = [process.argv[0], scriptPath, ...process.argv.slice(3)];
+  await import(scriptPath);
 } else if (command === 'version' || command === '--version' || command === '-v') {
   const { readFileSync } = await import('fs');
   const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
@@ -15,9 +19,11 @@ if (command === 'propose') {
   console.log(`Usage: nodpay <command>
 
 Commands:
+  keygen    Generate (or reuse) agent keypair
   propose   Propose a transaction for human approval
 
-Example:
+Examples:
+  nodpay keygen --env-file .env
   nodpay propose --safe 0x... --to 0x... --value-eth 0.01 --signer-type passkey
 
 Docs: https://nodpay.ai/skill.md`);
