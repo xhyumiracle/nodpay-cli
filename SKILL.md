@@ -44,6 +44,8 @@ node -e "const w=require('ethers').Wallet.createRandom();console.log('Address:',
 
 Store the private key as `NODPAY_AGENT_KEY` in your environment. The address is your public agent identity.
 
+**⚠️ Storing the env var may trigger a restart.** Complete all config/env changes and wait for the restart to finish BEFORE sending any message to the user. Do not send messages and update config in parallel — the restart will truncate your message.
+
 ### 2. Send the user a wallet link
 
 Replace `YOUR_AGENT_ADDRESS` with your EOA address and send:
