@@ -42,9 +42,9 @@ The wallet is a **Safe 2-of-3 multisig**. You hold 1 key, the user holds 2 (pass
 npx nodpay keygen --env-file .env
 ```
 
-This outputs your agent's **public address** (stdout). The private key is written directly to `.env` — it never appears in your output or context.
+Outputs your agent's **public address** only. The private key is written directly to `.env` — it never appears in your output or context.
 
-If `NODPAY_AGENT_KEY` already exists in the file, it reuses the existing key and prints the address.
+If a key already exists in the file, it reuses it and prints the address.
 
 **After keygen**, trigger a gateway restart so the env var takes effect. Send your wallet link message to the user BEFORE restarting — the restart will interrupt your session.
 
@@ -102,8 +102,6 @@ Each wallet file:
 }
 ```
 
-`agentSigner` is your agent's EOA address (derived from `NODPAY_AGENT_KEY`).
-
 For EOA wallets, replace passkey fields with `"userSigner": "0x..."`.
 
 One agent key serves all wallets — multi-wallet is handled user-side (different passkeys/recovery keys → different Safe addresses, same agent).
@@ -113,7 +111,6 @@ One agent key serves all wallets — multi-wallet is handled user-side (differen
 ### Propose a transaction
 
 ```bash
-NODPAY_AGENT_KEY=0x... \
 npx nodpay propose \
   --chain <CHAIN_NAME> \
   --safe <WALLET_ADDRESS> \
@@ -134,12 +131,8 @@ The script outputs JSON with an `approveUrl`. Send it to the user:
 
 ### Check balance
 
-Use the RPC URL for the wallet's chain (see `references/networks.json`):
-
 ```bash
-curl -s -X POST <RPC_URL> \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","method":"eth_getBalance","params":["<WALLET_ADDRESS>","latest"],"id":1}'
+npx nodpay propose --chain <CHAIN_NAME> --safe <WALLET_ADDRESS> --check-balance
 ```
 
 If balance is 0, remind the user to deposit before proposing.
@@ -154,9 +147,7 @@ Always check before proposing — this tells you the current nonce, pending ops,
 
 ---
 
-## Script Reference
-
-### Flags
+## Flags
 
 | Flag | Required | Description |
 |------|----------|-------------|
@@ -172,16 +163,6 @@ Always check before proposing — this tells you the current nonce, pending ops,
 | `--nonce` | optional | Force nonce (for replacements) |
 | `--purpose` | optional | Human-readable label |
 
-### Environment
-
-Only one env var is required:
-
-| Var | Description |
-|-----|-------------|
-| `NODPAY_AGENT_KEY` | Agent signing key (required) |
-
-Chain config (RPC, bundler) is auto-resolved via `--chain` from [`@nodpay/core/networks`](https://www.npmjs.com/package/@nodpay/core). You can override with `RPC_URL`/`CHAIN_ID` env vars if needed, but `--chain` is the recommended way.
-
 ### Supported Chains
 
 `ethereum`, `base`, `arbitrum`, `optimism`, `polygon`, `sepolia`, `base_sepolia`
@@ -192,11 +173,11 @@ The wallet address is the same across all chains (counterfactual). Chain is only
 
 ## Transaction Patterns
 
-**Sequential**: Just call propose multiple times. Nonces auto-increment (script handles this).
+**Sequential**: Just call propose multiple times. Nonces auto-increment.
 
-**Replace**: To replace a pending tx, propose with `--nonce N` where N is the nonce of the tx you want to replace. Check pending nonces via `GET /api/txs?safe=<ADDRESS>` — each tx in the response includes its `nonce`.
+**Replace**: Propose with `--nonce N` to replace a pending tx at nonce N. Check pending nonces via `GET /api/txs?safe=<ADDRESS>`.
 
-**Cascade**: Rejecting tx at nonce N auto-invalidates all tx with nonce > N. This is irreversible.
+**Cascade**: Rejecting tx at nonce N invalidates all tx with nonce > N. Irreversible.
 
 ⚠️ **Never propose a new nonce then reject an older one** — the cascade will destroy your new tx too.
 
@@ -204,7 +185,7 @@ The wallet address is the same across all chains (counterfactual). Chain is only
 
 ## Reconnect (Wallet Recovery)
 
-If the user cleared their browser data, the wallet still exists on-chain. Build a reconnect link:
+If the user cleared their browser data, build a reconnect link:
 
 ```
 https://nodpay.ai/?agent=YOUR_AGENT_ADDRESS&safe=WALLET_ADDRESS&recovery=RECOVERY_SIGNER&x=PASSKEY_X&y=PASSKEY_Y
@@ -234,7 +215,7 @@ User opens → verifies passkey → wallet restored. No on-chain action needed.
 | User says | Action |
 |-----------|--------|
 | "create a wallet" | Send `https://nodpay.ai/?agent=YOUR_ADDRESS` |
-| "send 0.1 ETH to 0x..." | Propose transaction |
-| "balance" | RPC `eth_getBalance` on Safe address |
+| "send 0.1 ETH to 0x..." | Propose transaction with `--chain` |
+| "balance" | Check balance on the relevant chain |
 | "pending?" | `GET /api/txs?safe=...` |
 | "wallet disappeared" | Send reconnect link |
