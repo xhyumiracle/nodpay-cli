@@ -19,7 +19,7 @@
  *   --human-signer-eoa <address>  - Human's EOA signer address (for EOA mode)
  *   --salt <nonce>           - Salt nonce (required for counterfactual)
  *   --reuse-gas-from <shortHash>  - Reuse gas values from a previous op (shortHash prefix of safeOpHash)
- *   --nonce <n>              - Override nonce
+ *   --nonce <n>              - Required. Use `txs` to find current nonce.
  *
  * Output: JSON with userOpHash, safeTxHash, safeOperationJson, etc.
  */
@@ -336,38 +336,14 @@ try {
   const opStoreUrl = opStoreBase;
   const safeAddr = await safe4337Pack.protocolKit.getAddress();
 
-  // Determine nonce: on-chain nonce is the source of truth.
-  // For queued ops, find the highest pending nonce and increment.
-  if (customNonceArg !== undefined) {
-    txOptions.customNonce = BigInt(customNonceArg);
-  } else {
-    try {
-      const provider = new ethers.JsonRpcProvider(RPC_URL);
-      const ep = new ethers.Contract('0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
-        ['function getNonce(address,uint192) view returns (uint256)'], provider);
-      const onChainNonce = await ep.getNonce(safeAddr, 0);
-
-      // Check pending ops to find the highest queued nonce
-      const listRes = await fetch(`${opStoreUrl}/txs?safe=${safeAddr}&chain=${CHAIN_ID}`);
-      let nextNonce = onChainNonce;
-      if (listRes.ok) {
-        const listData = await listRes.json();
-        for (const op of (listData.txs || listData.ops || [])) {
-          const opNonce = BigInt(op.nonce ?? -1);
-          if (opNonce >= onChainNonce && opNonce >= nextNonce) {
-            nextNonce = opNonce + 1n;
-          }
-        }
-      }
-      // Only set custom nonce if we need to skip ahead for queuing
-      if (nextNonce > onChainNonce) {
-        txOptions.customNonce = nextNonce;
-      }
-      // else: let SDK use on-chain nonce naturally
-    } catch (e) {
-      // Non-fatal: SDK will use its own nonce detection
-    }
+  // --nonce is required. Agent must run `txs` first to determine the correct nonce.
+  // This prevents accidental double-proposals: if agent proposes twice with the same nonce,
+  // the second is just a replacement (same slot), not a new transaction.
+  if (customNonceArg === undefined) {
+    console.error(JSON.stringify({ error: '--nonce is required. Run `npx nodpay txs --safe <SAFE>` first to check current nonce.' }));
+    process.exit(1);
   }
+  txOptions.customNonce = BigInt(customNonceArg);
 
   // Resolve gas values: use hardcoded defaults (from RPC gas price) always.
   // If --reuse-gas-from is provided and fetch succeeds, use those values instead

@@ -93,6 +93,7 @@ npx nodpay propose \
   --safe <SAFE> \
   --to <RECIPIENT> \
   --value-eth <AMOUNT> \
+  --nonce <N> \
   --human-signer-passkey-x <X> \
   --human-signer-passkey-y <Y> \
   --recovery-signer <RECOVERY>
@@ -156,7 +157,7 @@ EOA wallets: replace passkey fields with `"humanSignerEoa": "0x..."`.
 | `--human-signer-passkey-x/y` | passkey | Human signer passkey public key |
 | `--human-signer-eoa` | eoa | Human signer EOA address |
 | `--recovery-signer` | first tx | Recovery signer address |
-| `--nonce` | optional | Force nonce (replacements) |
+| `--nonce` | **required** | Nonce for this proposal. Run `txs` first to determine. |
 
 Wallet address is the same across all chains. **Ask which chain if not specified.**
 
