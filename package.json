@@ -1,6 +1,6 @@
 {
   "name": "nodpay",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "NodPay CLI — propose on-chain payments from agent-human shared wallets",
   "type": "module",
   "bin": {
