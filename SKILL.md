@@ -27,11 +27,11 @@ You propose payments, your human approves with one tap. 2-of-3 multisig — you 
 
 | Guarantee | How |
 |-----------|-----|
-| **2-of-3 multisig custody** | Agent (EOA), human (passkey), and recovery signer each hold one key. Any 2 can authorize — agent alone cannot move funds. Human + recovery signer can operate without agent. |
-| **Recovery by design** | Recovery signer is a user-held 12-word mnemonic stored locally. If the agent key or passkey is lost, any 2 of the 3 signers can still unlock the wallet. |
-| **Agent key isolated from context** | `keygen` writes directly to `~/.nodpay/.env` (chmod 600). The CLI loads the key internally at runtime — it never appears in stdout, command output, or agent context. |
-| **Zero trust** | Every party verifies every other. Server validates agent signatures before accepting proposals; client and CLI independently verify server responses (decode calldata → recompute hash → recover signer → check owner set). The chain is the sole source of truth. |
-| **Stateless server, client-side crypto** | The server relays signed operations and stores pending UserOps — no private keys, no custody, no accounts. All signing happens locally (agent CLI or user passkey). Funds stay on-chain if the server goes offline. |
+| **Threshold Security** | Elimination of single point of failure: authority keys are distributed between the agent, human, and a recovery signer (2-of-3 multisig). Ensures non-custodial control — the agent cannot move funds unilaterally. |
+| **Zero Trust** | End-to-end verification: no party is implicitly trusted. Server validates signatures; client and CLI independently verify server responses (decode calldata → recompute hash → recover signer → check owner set). The blockchain serves as the canonical source of truth. |
+| **Sovereign Recovery** | Key redundancy & continuity: uses a locally-stored 12-word mnemonic as recovery signer. Any two of the three signers can reconstruct authority to unlock the wallet, ensuring the user is never locked out by a single lost credential. |
+| **Hardened Key Isolation** | `keygen` writes directly to `~/.nodpay/.env` (chmod 600). The CLI loads the key internally at runtime — preventing accidental leakage via LLM outputs or stdout. |
+| **Keyless & Non-Custodial Server** | The server acts purely as a relayer — it stores no private keys and maintains no session state that could compromise assets. All signing happens locally. Funds stay on-chain if the server goes offline. |
 
 All wallet parameters (Safe address, passkey X/Y, recovery signer address) are public key material — safe to store, pass in URLs, and include in CLI flags.
 
