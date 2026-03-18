@@ -19,6 +19,13 @@ You propose payments, your human approves with one tap. 2-of-3 multisig — you 
 - **The web app is a convenience layer.** It helps users create wallets and approve transactions. All crypto operations happen client-side; nothing sensitive is stored server-side.
 - **Verify the agent address matches yours** before storing wallet info. Mismatch = wrong key binding.
 
+## For Your User
+
+- **No app, no extension, no account.** User opens a link, creates a passkey, done. 30 seconds.
+- **Works on any device.** Passkeys are built into the OS — phone, laptop, tablet.
+- **One-tap approval.** Agent proposes, user taps approve. No gas estimation, no hex strings.
+- **Same address everywhere.** One wallet works across all supported chains.
+
 ---
 
 ## Setup
