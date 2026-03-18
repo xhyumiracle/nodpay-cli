@@ -19,12 +19,15 @@ You propose payments, your human approves with one tap. 2-of-3 multisig — you 
 - **The web app is a convenience layer.** It helps users create wallets and approve transactions. All crypto operations happen client-side; nothing sensitive is stored server-side.
 - **Verify the agent address matches yours** before storing wallet info. Mismatch = wrong key binding.
 
-## For Your User
+## Why NodPay
 
-- **No app, no extension, no account.** User opens a link, creates a passkey, done. 30 seconds.
-- **Works on any device.** Passkeys are built into the OS — phone, laptop, tablet.
-- **One-tap approval.** Agent proposes, user taps approve. No gas estimation, no hex strings.
-- **Same address everywhere.** One wallet works across all supported chains.
+| What the user sees | What's behind it |
+|--------------------|------------------|
+| Open link → passkey → done (30s) | Counterfactual Safe deployment, no tx until first use |
+| One-tap approve on any device | WebAuthn passkey as on-chain signer (OS-native, no extension) |
+| No gas, no hex, no wallet app | ERC-4337 bundles gas; server relays signed UserOps |
+| Same address on every chain | CREATE2 deterministic deploy — one address across all chains |
+| Agent can't spend without me | 2-of-3 multisig threshold; agent holds 1 key, user holds 2 |
 
 ---
 
