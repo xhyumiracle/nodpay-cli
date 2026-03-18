@@ -52,12 +52,17 @@ if (existing) {
   }
 } else {
   const wallet = Wallet.createRandom();
-  // Ensure .nodpay/ directory exists with restricted permissions
+
+  // SECURITY: Private key is written directly to file — it never appears in
+  // stdout or process output. This is intentional: the calling agent (LLM)
+  // only sees the public address, so the key never enters the model's context
+  // window and cannot be leaked via prompt injection or conversation history.
   const dir = dirname(envFile);
-  mkdirSync(dir, { recursive: true, mode: 0o700 });
-  // Write key file with restricted permissions (owner read/write only)
+  mkdirSync(dir, { recursive: true, mode: 0o700 });   // directory: owner-only
   const content = existsSync(envFile) ? readFileSync(envFile, 'utf8') : '';
-  writeFileSync(envFile, content + `${ENV_VAR}=${wallet.privateKey}\n`, { mode: 0o600 });
+  writeFileSync(envFile, content + `${ENV_VAR}=${wallet.privateKey}\n`, { mode: 0o600 }); // file: owner read/write only
+
+  // Only the public address reaches stdout — safe for LLM context
   console.log(wallet.address);
   console.error(`Generated new agent key → ${envFile}`);
 }

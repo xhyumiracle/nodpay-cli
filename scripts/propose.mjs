@@ -62,7 +62,9 @@ if (!RPC_URL || !CHAIN_ID) {
 }
 const ENTRYPOINT_ADDRESS = ENTRYPOINT;
 
-// Read agent key from .nodpay/.env
+// SECURITY: Read agent key from .nodpay/.env file (chmod 600), not from
+// process.env or CLI args. The key is loaded at runtime by the script itself,
+// so it never passes through the LLM agent's context or conversation history.
 function loadAgentKey() {
   try {
     const envPath = join(process.cwd(), '.nodpay', '.env');
