@@ -156,7 +156,7 @@ EOA wallets: replace passkey fields with `"humanSignerEoa": "0x..."`.
 
 | Flag | Required | Description |
 |------|----------|-------------|
-| `--chain` | ✅ | `ethereum`, `base`, `arbitrum`, `optimism`, `polygon`, `sepolia`, `base_sepolia` |
+| `--chain` | ✅ | `base`, `arbitrum`, `polygon`, `optimism`, `ethereum`, `sepolia`, `base_sepolia` |
 | `--safe` | ✅ | Wallet address |
 | `--to` | ✅ | Recipient |
 | `--value-eth` | ✅ | Amount in ETH |
@@ -165,7 +165,7 @@ EOA wallets: replace passkey fields with `"humanSignerEoa": "0x..."`.
 | `--recovery-signer` | first tx | Recovery signer address |
 | `--nonce` | **required** | Nonce for this proposal. Run `txs` first to determine. |
 
-Wallet address is the same across all chains. **Ask which chain if not specified.**
+Wallet address is the same across all chains. **Ask which chain if not specified.** Prefer L2 chains (Base, Arbitrum, etc.) — Ethereum mainnet gas is significantly more expensive.
 
 ---
 
