@@ -40,7 +40,7 @@ Ethereum · Base · Arbitrum · Optimism · Polygon · Sepolia · Base Sepolia
 
 ## Related
 
-- [`@nodpay/core`](https://github.com/xhyumiracle/nodpay-core) — Protocol primitives (hash, decode, verify)
+- [`@nodpay/core`](https://www.npmjs.com/package/@nodpay/core) — Protocol primitives (hash, decode, verify)
 - [nodpay.ai](https://nodpay.ai) — Web app
 
 ## License
