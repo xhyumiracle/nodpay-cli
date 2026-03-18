@@ -113,6 +113,12 @@ npx nodpay txs --safe <SAFE>
 
 **Always run `txs` before proposing.** Do not assume a previous transaction is still pending — the human may have approved or rejected it without telling you. Check actual on-chain state first.
 
+```bash
+npx nodpay gasprice --chain <CHAIN>
+```
+
+Returns current gas price and estimated gas cost (`estimatedGasCost.deploy` for first tx, `.call` for subsequent). Use when proposing a sweep: `maxSendable = balance - estimatedGasCost.deploy`.
+
 ---
 
 ## Data
