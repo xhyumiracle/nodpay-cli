@@ -49,28 +49,25 @@ try {
   const provider = new ethers.JsonRpcProvider(net.rpcUrl);
   const ep = new ethers.Contract(
     ENTRYPOINT,
-    ['function getNonce(address sender, uint192 key) view returns (uint256)'],
+    ['function getNonce(address,uint192) view returns (uint256)'],
     provider
   );
-  const onChainNonce = Number(await ep.getNonce(safe, 0));
+  const onChainNonce = await ep.getNonce(safe, 0);
 
-  // 2. Check op-store for pending proposals (may have nonces >= onChainNonce)
+  // 2. Check pending ops to find the highest queued nonce
+  //    (same logic as the battle-tested propose.mjs nonce resolution)
   let nextNonce = onChainNonce;
   let pendingCount = 0;
   try {
     const baseUrl = 'https://nodpay.ai/api';
-    const params = new URLSearchParams({ safe });
-    if (chainArg) params.set('chain', String(net.chainId));
-    const res = await fetch(`${baseUrl}/txs?${params}`);
-    if (res.ok) {
-      const data = await res.json();
-      for (const op of (data.txs || [])) {
-        const opNonce = Number(op.nonce ?? -1);
-        if (opNonce >= onChainNonce) {
+    const listRes = await fetch(`${baseUrl}/txs?safe=${safe}&chain=${net.chainId}`);
+    if (listRes.ok) {
+      const listData = await listRes.json();
+      for (const op of (listData.txs || listData.ops || [])) {
+        const opNonce = BigInt(op.nonce ?? -1);
+        if (opNonce >= onChainNonce && opNonce >= nextNonce) {
           pendingCount++;
-          if (opNonce >= nextNonce) {
-            nextNonce = opNonce + 1;
-          }
+          nextNonce = opNonce + 1n;
         }
       }
     }
@@ -79,8 +76,8 @@ try {
   }
 
   console.log(JSON.stringify({
-    nextNonce,
-    onChainNonce,
+    nextNonce: Number(nextNonce),
+    onChainNonce: Number(onChainNonce),
     pendingCount,
     safe,
     chain: chainArg,
