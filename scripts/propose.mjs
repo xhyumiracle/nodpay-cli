@@ -311,6 +311,15 @@ try {
 
   const safeAddress = await safe4337Pack.protocolKit.getAddress();
 
+  // Safety check: if --safe was explicitly given, the computed address MUST match.
+  // Mismatch means owner set / salt / SDK version differs from wallet creation — abort.
+  if (SAFE_ADDRESS && safeAddress.toLowerCase() !== SAFE_ADDRESS.toLowerCase()) {
+    console.error(JSON.stringify({
+      error: `Address mismatch: --safe ${SAFE_ADDRESS} but SDK computed ${safeAddress}. Check --human-signer-eoa, --recovery-signer, and --salt match the original wallet creation params.`
+    }));
+    process.exit(1);
+  }
+
   // Auto-detect deployment status: if Safe is already deployed, drop counterfactual
   if (isCounterfactual) {
     const provider = new ethers.JsonRpcProvider(RPC_URL);
