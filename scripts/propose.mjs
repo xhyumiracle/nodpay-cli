@@ -6,11 +6,7 @@
  * The agent signs first (1 of 2). The serialized SafeOperation is
  * output so the web app can have the user co-sign and submit.
  *
- * Env vars:
- *   NODPAY_AGENT_KEY  - Agent signer private key
- *   SAFE_ADDRESS       - Deployed Safe address (can be overridden with --safe)
- *   RPC_URL            - RPC endpoint
- *   CHAIN_ID           - Chain ID (required, no default)
+ * Agent key is read from .nodpay/.env (run `npx nodpay keygen` to generate).
  *
  * Args:
  *   --to <address>           - Recipient address
@@ -66,9 +62,8 @@ if (!RPC_URL || !CHAIN_ID) {
 }
 const ENTRYPOINT_ADDRESS = ENTRYPOINT;
 
-// Read agent key: env var first, then .nodpay/.env file
+// Read agent key from .nodpay/.env
 function loadAgentKey() {
-  if (process.env.NODPAY_AGENT_KEY) return process.env.NODPAY_AGENT_KEY;
   try {
     const envPath = join(process.cwd(), '.nodpay', '.env');
     const lines = readFileSync(envPath, 'utf8').split('\n');
@@ -97,7 +92,7 @@ const BUNDLER_URL = PIMLICO_API_KEY
   : `${opStoreBase}/bundler/${CHAIN_ID}`;
 
 if (!NODPAY_AGENT_KEY) {
-  console.error(JSON.stringify({ error: 'Missing NODPAY_AGENT_KEY env var' }));
+  console.error(JSON.stringify({ error: 'Missing NODPAY_AGENT_KEY in .nodpay/.env — run npx nodpay keygen first' }));
   process.exit(1);
 }
 
