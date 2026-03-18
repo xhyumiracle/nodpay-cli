@@ -309,7 +309,41 @@ try {
 
   const safe4337Pack = await Safe4337Pack.init(initOptions);
 
-  const safeAddress = await safe4337Pack.protocolKit.getAddress();
+  let safeAddress = await safe4337Pack.protocolKit.getAddress();
+
+  // --- Ethereum mainnet: force L2 singleton for cross-chain address consistency ---
+  //
+  // Safe SDK defaults to the L1 singleton on chainId 1, but all other chains use the L2
+  // singleton. Different singleton → different CREATE2 address → cross-chain mismatch.
+  //
+  // The L2 singleton (0x29fc...) IS deployed on Ethereum mainnet. Using it there costs
+  // ~2.3% more gas per tx (~$0.14 at 15 Gwei) due to extra event emissions — acceptable.
+  //
+  // Trade-off: safe.global may not fully index L2-singleton Safes on mainnet (their L1
+  // indexer uses trace-based filtering by known singleton addresses). NodPay uses its own
+  // op-store, so this doesn't affect us.
+  //
+  // Long-term plan: support separate L1/L2 wallet families — user chooses at creation time.
+  // For now, we unify on L2 singleton across all chains for address consistency.
+  if (
+    isCounterfactual &&
+    CHAIN_ID === '1' &&
+    SAFE_ADDRESS &&
+    safeAddress.toLowerCase() !== SAFE_ADDRESS.toLowerCase()
+  ) {
+    const Safe = (await import('@safe-global/protocol-kit')).default;
+    // getPredictedSafe() returns the full config Safe4337Pack assembled — owners, threshold,
+    // module setup (to/data), fallbackHandler, salt, etc. We re-init with the same config
+    // but isL1SafeSingleton=false so the SDK picks L2 singleton.
+    const predictedSafe = safe4337Pack.protocolKit.getPredictedSafe();
+    safe4337Pack.protocolKit = await Safe.init({
+      provider: RPC_URL,
+      signer: initOptions.signer,
+      isL1SafeSingleton: false,
+      predictedSafe,
+    });
+    safeAddress = await safe4337Pack.protocolKit.getAddress();
+  }
 
   // Safety check: if --safe was explicitly given, the computed address MUST match.
   // Mismatch means owner set / salt / SDK version differs from wallet creation — abort.
