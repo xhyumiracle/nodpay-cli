@@ -5,7 +5,7 @@ metadata:
   {
     "openclaw":
       {
-        "requires": { "bins": ["npx", "curl"] },
+        "requires": { "bins": ["npx", "curl"], "config": ["~/.nodpay/.env", "~/.nodpay/wallets/"] },
         "homepage": "https://nodpay.ai",
         "install": [{ "id": "node", "kind": "node", "package": "nodpay", "label": "Install NodPay CLI (npm)" }]
       },
