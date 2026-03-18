@@ -15,6 +15,10 @@ if (command === 'propose') {
   const scriptPath = new URL('../scripts/txs.mjs', import.meta.url).pathname;
   process.argv = [process.argv[0], scriptPath, ...process.argv.slice(3)];
   await import(scriptPath);
+} else if (command === 'gasprice') {
+  const scriptPath = new URL('../scripts/gasprice.mjs', import.meta.url).pathname;
+  process.argv = [process.argv[0], scriptPath, ...process.argv.slice(3)];
+  await import(scriptPath);
 } else if (command === 'version' || command === '--version' || command === '-v') {
   const { readFileSync } = await import('fs');
   const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
@@ -26,11 +30,13 @@ Commands:
   keygen    Generate (or reuse) agent keypair
   propose   Propose a transaction for human approval
   txs       List pending and completed transactions
+  gasprice  Get current gas price and estimated gas cost per chain
 
 Examples:
   nodpay keygen
   nodpay propose --safe 0x... --to 0x... --value-eth 0.01 --chain base
   nodpay txs --safe 0x...
+  nodpay gasprice --chain base
 
 Docs: https://nodpay.ai/skill.md`);
   process.exit(command ? 1 : 0);
