@@ -28,11 +28,29 @@ NODPAY_AGENT_KEY=0x... npx nodpay propose \
 3. Agent proposes transactions with `npx nodpay propose`
 4. User approves/rejects on their phone
 
+## Key generation
+
+```bash
+npx nodpay keygen --env-file .env
+```
+
+Outputs the agent's **public address only**. The private key is written directly to `.env` — it never appears in stdout, logs, or the agent's context window.
+
+If a key already exists, it reuses it and prints the address.
+
+### Security design
+
+The agent (LLM) **never sees the private key**. `keygen` writes the secret directly to disk; the `propose` command reads it from the environment at runtime. This means:
+
+- No private key in conversation history or context window
+- No risk of leaking the key through prompt injection
+- The agent only needs the public address (for wallet links)
+
 ## Env
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `NODPAY_AGENT_KEY` | ✅ | Agent's private key (hex) |
+| `NODPAY_AGENT_KEY` | ✅ | Agent's private key — use `npx nodpay keygen` to generate securely |
 
 ## Supported chains
 
