@@ -111,7 +111,7 @@ First tx deploys the wallet. Pass all params for first tx; after that `--safe` a
 npx nodpay txs --safe <SAFE>
 ```
 
-Check before proposing — shows nonce, pending ops, and wallet status.
+**Always run `txs` before proposing.** Do not assume a previous transaction is still pending — the human may have approved or rejected it without telling you. Check actual on-chain state first.
 
 ---
 
