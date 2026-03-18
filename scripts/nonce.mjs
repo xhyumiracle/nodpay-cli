@@ -54,7 +54,7 @@ try {
   const onChainNonce = await ep.getNonce(safe, 0);
 
   console.log(JSON.stringify({
-    nonce: Number(onChainNonce),
+    nextNonce: Number(onChainNonce),
     safe,
     chain: chainArg,
     chainId: String(net.chainId),
