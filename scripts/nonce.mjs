@@ -45,16 +45,43 @@ if (!net) {
 }
 
 try {
+  // 1. On-chain nonce from EntryPoint (source of truth for executed txs)
   const provider = new ethers.JsonRpcProvider(net.rpcUrl);
   const ep = new ethers.Contract(
     ENTRYPOINT,
     ['function getNonce(address sender, uint192 key) view returns (uint256)'],
     provider
   );
-  const onChainNonce = await ep.getNonce(safe, 0);
+  const onChainNonce = Number(await ep.getNonce(safe, 0));
+
+  // 2. Check op-store for pending proposals (may have nonces >= onChainNonce)
+  let nextNonce = onChainNonce;
+  let pendingCount = 0;
+  try {
+    const baseUrl = 'https://nodpay.ai/api';
+    const params = new URLSearchParams({ safe });
+    if (chainArg) params.set('chain', String(net.chainId));
+    const res = await fetch(`${baseUrl}/txs?${params}`);
+    if (res.ok) {
+      const data = await res.json();
+      for (const op of (data.txs || [])) {
+        const opNonce = Number(op.nonce ?? -1);
+        if (opNonce >= onChainNonce) {
+          pendingCount++;
+          if (opNonce >= nextNonce) {
+            nextNonce = opNonce + 1;
+          }
+        }
+      }
+    }
+  } catch (e) {
+    // Non-fatal: op-store may be unavailable, fall back to on-chain only
+  }
 
   console.log(JSON.stringify({
-    nextNonce: Number(onChainNonce),
+    nextNonce,
+    onChainNonce,
+    pendingCount,
     safe,
     chain: chainArg,
     chainId: String(net.chainId),
